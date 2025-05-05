@@ -1,0 +1,140 @@
+plugins {
+  id 'com.diffplug.spotless' version '6.25.0'
+}
+repositories {
+  mavenLocal()
+  mavenCentral()
+  maven {
+    url 'https://www.jitpack.io'
+  }
+  maven{ url "https://gh.llkk.cc/https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+}
+
+spotless {
+  format 'styling', {
+    target '*.json','**/*.json'
+    prettier().config(['tabWidth': 2])
+  }
+  flexmark {
+    target '**/*.md'
+    flexmark()
+  }
+}
+ext{
+  versions = [:]
+  libraries = [:]
+}
+versions.arc = "v149"
+libraries.getArc = { String moduleName ->
+  return "com.github.Anuken.Arc:$moduleName:${versions.arc}"
+}
+versions.mdt = "v149"
+libraries.getMdt = { String moduleName ->
+  return "com.github.Anuken.Mindustry:$moduleName:${versions.mdt}"
+}
+libraries.arcCore = libraries.getArc("arc-core")
+libraries.mdtCore = libraries.getMdt("core")
+allprojects {
+  apply plugin: "java"
+  apply plugin: "com.diffplug.spotless"
+  apply plugin: 'eclipse'
+  version '1.0'
+  spotless {
+    groovyGradle {
+      target '*.gradle'
+      greclipse().configFile("${rootProject.projectDir}/greclipse.properties")
+    }
+    java {
+      eclipse()
+          .configFile("${rootProject.projectDir}/eclipse-prefs.xml")
+      licenseHeader '/* (C) $YEAR */'
+    }
+  }
+  repositories {
+    mavenLocal()
+    maven{ url 'https://repo.eclipse.org/content/groups/releases/' }
+    mavenCentral()
+    maven{ url "https://raw.kkgithub.com/Zelaux/MindustryRepo/master/repository" }
+
+    maven {
+      url 'https://www.jitpack.io'
+    }
+  }
+
+  java {
+    targetCompatibility = 8
+    sourceCompatibility = JavaVersion.VERSION_17
+  }
+
+  ext {
+    mindustryVersion = 'v146'
+    jabelVersion = "0.9.0"
+    isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
+    sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+  }
+
+  tasks.withType(JavaCompile){
+    options.compilerArgs.addAll(['--release', '8'])
+  }
+
+  dependencies{
+    compileOnly libraries.mdtCore
+    compileOnly libraries.arcCore
+
+    annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
+  }
+
+  jar{
+    duplicatesStrategy='exclude'
+    archiveFileName = "${base.archivesBaseName}Desktop.jar"
+
+    from{
+      configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
+    }
+    from("build/generated/assets"){
+      include "**"
+    }
+    from("assets/"){
+      include "**"
+    }
+  }
+  task jarAndroid{
+    dependsOn "jar"
+
+    doLast{
+
+      def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList()).collect{ "--classpath $it.path" }.join(" ")
+
+
+      "d8 $dependencies --min-api 14 --output ${project.archivesBaseName}Android.jar ${project.archivesBaseName}Desktop.jar"
+          .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+    }
+  }
+
+  task deploy(type: Jar){
+    dependsOn jarAndroid
+    dependsOn jar
+    archiveFileName = "oxygen-${base.archivesBaseName}.jar"
+
+    from{
+      [
+        zipTree("$buildDir/libs/${project.archivesBaseName}Desktop.jar"),
+        zipTree("$buildDir/libs/${project.archivesBaseName}Android.jar")
+      ]
+    }
+
+    doLast{
+      delete{
+        delete "$buildDir/libs/${project.archivesBaseName}Desktop.jar"
+        delete "$buildDir/libs/${project.archivesBaseName}Android.jar"
+      }
+    }
+  }
+  configurations.all{
+    resolutionStrategy.eachDependency { details ->
+      if(details.requested.group == 'com.github.Anuken.Arc'){
+        details.useVersion "$mindustryVersion"
+      }
+    }
+  }
+}
