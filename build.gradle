@@ -26,11 +26,11 @@ ext{
 }
 versions.arc = "v149"
 libraries.getArc = { String moduleName ->
-  return "com.github.Anuken.Arc:$moduleName:${versions.arc}"
+  return "com.github.anuken.arc:$moduleName:${versions.arc}"
 }
 versions.mdt = "v149"
 libraries.getMdt = { String moduleName ->
-  return "com.github.Anuken.Mindustry:$moduleName:${versions.mdt}"
+  return "com.github.anuken.mindustry:$moduleName:${versions.mdt}"
 }
 libraries.arcCore = libraries.getArc("arc-core")
 libraries.mdtCore = libraries.getMdt("core")
@@ -54,8 +54,6 @@ allprojects {
     mavenLocal()
     maven{ url 'https://repo.eclipse.org/content/groups/releases/' }
     mavenCentral()
-    maven{ url "https://raw.kkgithub.com/Zelaux/MindustryRepo/master/repository" }
-
     maven {
       url 'https://www.jitpack.io'
     }
@@ -67,7 +65,6 @@ allprojects {
   }
 
   ext {
-    mindustryVersion = 'v146'
     jabelVersion = "0.9.0"
     isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
@@ -114,7 +111,7 @@ allprojects {
   task deploy(type: Jar){
     dependsOn jarAndroid
     dependsOn jar
-    archiveFileName = "oxygen-${base.archivesBaseName}.jar"
+    archiveFileName = "preoxide-${base.archivesBaseName}.jar"
 
     from{
       [
@@ -133,8 +130,21 @@ allprojects {
   configurations.all{
     resolutionStrategy.eachDependency { details ->
       if(details.requested.group == 'com.github.Anuken.Arc'){
-        details.useVersion "$mindustryVersion"
+        details.useVersion "$versions.arc"
       }
     }
+  }
+}
+project(":graphics"){
+  ext{
+  }
+  dependencies{
+  }
+}
+project(":universe"){
+  ext{
+  }
+  dependencies{
+    compileOnly project(":graphics")
   }
 }
