@@ -135,6 +135,12 @@ allprojects {
     }
   }
 }
+project(":parser"){
+  ext{
+  }
+  dependencies{
+  }
+}
 project(":graphics"){
   ext{
   }
@@ -146,5 +152,6 @@ project(":universe"){
   }
   dependencies{
     compileOnly project(":graphics")
+    compileOnly project(":parser")
   }
 }

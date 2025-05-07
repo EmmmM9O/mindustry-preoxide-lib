@@ -5,5 +5,5 @@ pluginManagement {
     gradlePluginPortal()
   }
 }
-include 'graphics','universe'
+include 'graphics','universe','parser'
 rootProject.name="preoxide"
