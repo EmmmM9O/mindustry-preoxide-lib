@@ -1,0 +1,9 @@
+{
+  "name": "poeu",
+  "displayName": "Preoxide Example Universe",
+  "author": "emmmM9O",
+  "description": "for test universe",
+  "version": "alpha",
+  "minGameVersion": 147,
+  "dependencies":["pop"]
+}

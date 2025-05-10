@@ -1,0 +1,9 @@
+{
+  "displayName": "Preoxide Parser",
+  "name": "pop",
+  "author": "emmmM9O",
+  "main": "preoxide.POParserMain",
+  "description": "lib for preoxide",
+  "version": "alpha",
+  "minGameVersion": 147
+}

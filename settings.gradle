@@ -6,4 +6,6 @@ pluginManagement {
   }
 }
 include 'graphics','universe','parser'
+
+include ':examples:universe'
 rootProject.name="preoxide"

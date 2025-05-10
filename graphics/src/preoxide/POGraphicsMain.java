@@ -4,12 +4,11 @@ package preoxide;
 import arc.util.*;
 import mindustry.mod.*;
 
-public class PreoxideGraphicsMain extends Mod {
-  public PreoxideGraphicsMain() {
+public class POGraphicsMain extends Mod {
+  public POGraphicsMain() {
     Log.info("Preoxide Graphics Lib Loading");
   }
 
   @Override
-  public void init() {
-  }
+  public void init() {}
 }

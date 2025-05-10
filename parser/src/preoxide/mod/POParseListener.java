@@ -1,3 +1,4 @@
+/* (C) 2025 */
 package preoxide.mod;
 
 import arc.util.serialization.*;
