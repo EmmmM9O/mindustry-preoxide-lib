@@ -29,7 +29,7 @@ public class POShaders {
       setUniformf("u_start_distance_2", startDistance * startDistance);
       setUniformf("u_radius_2", radius * radius);
       setUniformf("u_resolution", resolution);
-      setUniformf("u_camera_pos", Tmp.v34.set(camera.position).sub(target));
+      setUniformf("u_camera_pos", POGUtil.t34.set(camera.position).sub(target));
       setUniformMatrix("u_camera_mat", POGUtil.getCamMat(camera));
       cubemap.bind(1);
       setUniformi("u_cubemap", 1);

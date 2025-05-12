@@ -222,13 +222,8 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     planetTextures = new Texture[2];
     String[] names = { "sprites/planets/serpulo.png", "sprites/planets/erekir.png" };
     for (int i = 0; i < names.length; i++) {
-      int fi = i;
-      assets.load(names[i], Texture.class, new TextureParameter() {
-        {
-          minFilter = magFilter = TextureFilter.linear;
-        }
-      }).loaded = t -> planetTextures[fi] = t;
-      assets.finishLoadingAsset(names[i]);
+      planetTextures[i] = new Texture(Core.files.internal(names[i]), true);
+      planetTextures[i].setFilter(TextureFilter.linear, TextureFilter.linear);
     }
 
     // unlock defaults for older campaign saves (TODO move? where to?)

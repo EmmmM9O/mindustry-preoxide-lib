@@ -7,5 +7,6 @@
   "orbitSpacing": 25,
   "cubemap": "test/",
   "startDistance": 20,
+  "accessible": false,
   "rayMaps": ["textures/fb_ray_map.png"]
 }

@@ -1,5 +1,5 @@
 uniform sampler2D u_ray_map;
-vec4 get_ray(in vec2 uv, in vec3 dir, in vec3 h) {
+vec4 get_ray(vec2 uv, vec3 dir, vec3 h) {
     vec4 coord = texture(u_ray_map, uv);
     if (coord.x <= 0.0001 && coord.y <= 0.0001) {
         return vec4(0.0, 0.0, 0.0, 1.0);

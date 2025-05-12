@@ -21,6 +21,8 @@ public class POGUtil {
   public static final Vec3 t31 = new Vec3();
   public static final Vec3 t32 = new Vec3();
   public static final Vec3 t33 = new Vec3();
+  public static final Vec3 t34 = new Vec3();
+  public static final Vec2 t21 = new Vec2();
   public static int cubeSize = 512;
 
   public static Cubemap getCube(Camera3D cam, Vec3 pos, Runnable render) {
@@ -28,9 +30,9 @@ public class POGUtil {
       cubeBuffer = new FrameBufferCubemap(Format.rgba8888, cubeSize, cubeSize, false);
       cubeHelper = new CubeHelper(cubeBuffer);
     }
-    var tpos = Tmp.v34.set(cam.position);
-    var up = t31.set(cam.up);
-    var dir = t32.set(cam.direction);
+    var tpos = t31.set(cam.position);
+    var up = t32.set(cam.up);
+    var dir = t33.set(cam.direction);
     var fov = cam.fov;
     cam.fov = 45f;
     cam.position.set(pos);
@@ -61,9 +63,9 @@ public class POGUtil {
 
   public static Mat getCamMat(Camera3D cam) {
     Mat mat = new Mat();
-    Vec3 dir = cam.direction.cpy().nor();
-    Vec3 right = cam.up.cpy().crs(dir).nor();
-    Vec3 up = dir.cpy().crs(right).nor();
+    Vec3 dir = t31.set(cam.direction).nor();
+    Vec3 right = t32.set(cam.up).crs(dir).nor();
+    Vec3 up = t33.set(dir).crs(right).nor();
     mat.val[Mat.M00] = right.x;
     mat.val[Mat.M01] = right.y;
     mat.val[Mat.M02] = right.z;

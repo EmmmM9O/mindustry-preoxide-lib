@@ -10,9 +10,9 @@ uniform vec3 u_camera_pos;
 uniform mat3 u_camera_mat;
 uniform samplerCube u_cubemap;
 
-vec4 get_ray(in vec2 uv, in vec3 dir, in vec3 h);
+vec4 get_ray(vec2 uv, vec3 dir, vec3 h);
 
-vec4 get_color(in vec3 pos, in vec3 dir) {
+vec4 get_color(vec3 pos, vec3 dir) {
     vec3 h = cross(pos, dir);
     float h2 = dot(h, h);
     float dis = sqrt(h2);

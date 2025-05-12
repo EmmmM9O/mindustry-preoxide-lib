@@ -94,10 +94,9 @@ public class FastBlackhole extends POPlanet {
      * renderer.renderR(params);
      * });
      */
-
     blackholeShader.cubemap = renderer.skyboxCube;
     blackholeShader.camera = cam;
-    blackholeShader.resolution = Tmp.v1.set(Core.graphics.getWidth(), Core.graphics.getHeight());
+    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth(), Core.graphics.getHeight());
     blackholeShader.cubemap = cubemap;
     Gl.clear(Gl.depthBufferBit);
     Gl.enable(Gl.depthTest);
@@ -108,13 +107,11 @@ public class FastBlackhole extends POPlanet {
     // renderer.bloom.capture();
     POMeshs.screen.render(blackholeShader, Gl.triangles);
     // renderer.bloom.render();
-    Blending.additive.apply();
-    params.drawSkybox = false;
+    // renderer.skybox.setCubemap(cubemap);
+    // renderer.skybox.render(cam.projection);
     Gl.depthMask(true);
     Gl.enable(Gl.cullFace);
     Gl.cullFace(Gl.back);
     renderer.renderR(params);
-    Blending.normal.apply();
-    params.drawSkybox = true;
   }
 }
