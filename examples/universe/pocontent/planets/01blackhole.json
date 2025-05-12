@@ -1,0 +1,11 @@
+{
+  "name": "blackhole",
+  "type": "FastBlackhole",
+  "displayName": "黑洞",
+  "iconColor": "483D8BFF",
+  "radius": 1,
+  "orbitSpacing": 25,
+  "cubemap": "test/",
+  "startDistance": 20,
+  "rayMaps": ["textures/fb_ray_map.png"]
+}

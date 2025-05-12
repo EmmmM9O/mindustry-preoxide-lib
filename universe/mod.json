@@ -1,0 +1,10 @@
+{
+  "displayName": "Preoxide Universe",
+  "name": "pou",
+  "author": "emmmM9O",
+  "main": "preoxide.POUniverseMain",
+  "description": "lib for preoxide",
+  "version": "alpha",
+  "minGameVersion": 147,
+  "dependencies": ["pop", "pog"]
+}

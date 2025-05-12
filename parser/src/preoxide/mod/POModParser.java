@@ -63,7 +63,7 @@ public class POModParser {
           Fi folder = contentRoot.child(lower + (lower.endsWith("s") ? "" : "s"));
           if (folder.exists()) {
             for (Fi file : folder.findAll(f -> f.extension().equals("json")
-                || f.extension().equals("hjson") || f.extension().equals("json5"))) {
+                || f.extension().equals("hjson"))) {
 
               // if this is part of the ordered content, put it aside to be dealt with later
               if (orderSet != null && orderSet.contains(file.nameWithoutExtension())) {

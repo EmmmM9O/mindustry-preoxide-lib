@@ -1,0 +1,9 @@
+{
+  "displayName": "Preoxide Graphics",
+  "name": "pog",
+  "author": "emmmM9O",
+  "main": "preoxide.POGraphicsMain",
+  "description": "lib for preoxide",
+  "version": "alpha",
+  "minGameVersion": 147
+}

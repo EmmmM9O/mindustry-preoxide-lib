@@ -5,5 +5,5 @@
   "description": "for test universe",
   "version": "alpha",
   "minGameVersion": 147,
-  "dependencies":["pop"]
+  "dependencies": ["pop"]
 }

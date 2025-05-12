@@ -124,6 +124,11 @@ public class POContentParser implements ContentParserI {
       });
     }
   };
+
+  public <T> void addClassParser(Class<T> clazz, POFieldParser<T> cParser) {
+    classParsers.put(clazz, cParser);
+  }
+
   private Json parser = new Json() {
     @Override
     public <T> T readValue(Class<T> type, Class elementType, JsonValue jsonData, Class keyType) {
@@ -291,15 +296,24 @@ public class POContentParser implements ContentParserI {
         });
         return out;
       }, ContentType.planet, (POTypeParser<Planet>) (mod, name, value) -> {
+        name=value.getString("name",name);
         readDisplayBundle(ContentType.planet, name, value);
         if (value.isString())
           return locate(ContentType.planet, name);
         Planet parent = locate(ContentType.planet, value.getString("parent", ""));
-        Planet planet_ = make(
-            resolve(ContentType.planet,
-                value.getString("type", "planet"), Planet.class),
-            new Class[] { String.class, Planet.class, float.class ,int.class},
-            mod + "-" + name, parent, value.getFloat("radius", 1f), value.getInt("sectorSize", 0));
+        Planet planet_ = make(resolve(ContentType.planet, value.getString("type", "planet"), Planet.class),
+            new Class[] { String.class, Planet.class, float.class, int.class }, mod + "-" + name,
+            parent, value.getFloat("radius", 1f), value.getInt("sectorSize", 0));
+        if (value.has("type"))
+          value.remove("type");
+        if (value.has("name"))
+          value.remove("name");
+        if (value.has("parent"))
+          value.remove("parent");
+        if (value.has("sectorSize"))
+          value.remove("sectorSize");
+        if (value.has("radius"))
+          value.remove("radius");
         try {
           planet_ = toggleTypeListeners(ContentType.planet, planet_, mod, name, value);
         } catch (Throwable e) {
