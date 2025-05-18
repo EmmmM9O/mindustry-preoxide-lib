@@ -14,7 +14,7 @@ import mindustry.type.*;
 import preoxide.universe.CustomizeRenderI;
 
 public class POPlanetRenderer implements Disposable {
-    public static final float outlineRad = 1.17f, camLength = 18f;
+    public static final float outlineRad = 1.17f, camLength = 4f;
     public static final Color outlineColor = Pal.accent.cpy().a(1f),
             hoverColor = Pal.accent.cpy().a(0.5f),
             borderColor = Pal.accent.cpy().a(0.3f),
@@ -44,7 +44,7 @@ public class POPlanetRenderer implements Disposable {
     public POPlanetRenderer() {
         projector.setScaling(1f / 150f);
         cam.fov = 60f;
-        cam.far = 150f;
+        cam.far = 400f;
     }
 
     public void renderF(PlanetParams params) {
@@ -138,7 +138,7 @@ public class POPlanetRenderer implements Disposable {
 
         cam.resize(w, h);
         bloom.resize(w, h);
-        params.camPos.setLength((params.planet.radius + params.planet.camRadius) * camLength
+        params.camPos.setLength((params.planet.radius + params.planet.camRadius) * getCamLength(params)
                 + (params.zoom - 1f) * (params.planet.radius + params.planet.camRadius) * 2);
 
         if (params.otherCamPos != null) {
@@ -273,5 +273,11 @@ public class POPlanetRenderer implements Disposable {
         void renderSectors(Planet planet);
 
         void renderProjections(Planet planet);
+    }
+
+    public static float getCamLength(PlanetParams params) {
+        if (params.planet instanceof CustomizeRenderI cRenderI)
+            return cRenderI.camLength();
+        return camLength;
     }
 }

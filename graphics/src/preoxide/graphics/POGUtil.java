@@ -5,6 +5,7 @@ import arc.*;
 import arc.files.*;
 import arc.graphics.*;
 import arc.graphics.Pixmap.*;
+import arc.graphics.g2d.*;
 import arc.graphics.g3d.*;
 import arc.graphics.gl.*;
 import arc.math.*;
@@ -23,7 +24,14 @@ public class POGUtil {
   public static final Vec3 t33 = new Vec3();
   public static final Vec3 t34 = new Vec3();
   public static final Vec2 t21 = new Vec2();
-  public static int cubeSize = 512;
+  public static int cubeSize = 1024;
+  private static ScreenQuad quad;
+
+  public static ScreenQuad getQuad() {
+    if (quad == null)
+      quad = new ScreenQuad();
+    return quad;
+  }
 
   public static Cubemap getCube(Camera3D cam, Vec3 pos, Runnable render) {
     if (cubeBuffer == null) {
@@ -34,7 +42,10 @@ public class POGUtil {
     var up = t32.set(cam.up);
     var dir = t33.set(cam.direction);
     var fov = cam.fov;
-    cam.fov = 45f;
+    var w = cam.width;
+    var h = cam.height;
+    cam.fov = 90f;
+    cam.resize(cubeSize, cubeSize);
     cam.position.set(pos);
     cubeHelper.begin();
     while (cubeHelper.nextSide()) {
@@ -44,6 +55,7 @@ public class POGUtil {
       render.run();
     }
     cubeHelper.end();
+    cam.resize(w, h);
     cam.position.set(tpos);
     cam.up.set(up);
     cam.direction.set(dir);

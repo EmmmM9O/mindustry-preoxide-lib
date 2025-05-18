@@ -18,5 +18,6 @@ public class POGraphicsMain extends Mod {
 
   @Override
   public void init() {
+    POGShaders.init();
   }
 }

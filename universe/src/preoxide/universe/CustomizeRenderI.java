@@ -33,4 +33,16 @@ public interface CustomizeRenderI {
   default void rendererAll(Camera3D cam, POPlanetRenderer renderer, PlanetParams params) {
 
   }
+
+  default float camLength() {
+    return 4.0f;
+  }
+
+  default float maxZoom() {
+    return 4.0f;
+  }
+
+  default void onResize() {
+
+  }
 }

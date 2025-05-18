@@ -1,30 +1,29 @@
-/* (C) 2025 */
 package preoxide.universe;
 
+import static mindustry.Vars.*;
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.graphics.g3d.*;
+import arc.graphics.gl.*;
 import arc.math.geom.*;
-import arc.struct.*;
 import arc.util.*;
 import arc.util.serialization.*;
-import mindustry.*;
 import mindustry.graphics.g3d.*;
 import mindustry.type.*;
-import preoxide.*;
 import preoxide.graphics.*;
 import preoxide.graphics.POUShaders.*;
+import preoxide.graphics.bloom.OCBloom;
+import preoxide.graphics.bloom.PyramidFourNAvgBloom;
+import preoxide.graphics.gl.*;
 import preoxide.mod.*;
 
-import static mindustry.Vars.*;
-
-public class FastBlackhole extends POPlanet implements CustomizeParser {
-  public FastBlackhole(String name, Planet parent, float radius, int sectorSize) {
+public class NoiseBlackhole extends POPlanet implements CustomizeParser {
+  public NoiseBlackhole(String name, Planet parent, float radius, int sectorSize) {
     super(name, parent, radius, sectorSize);
   }
 
-  public FastBlackhole(String name, Planet parent, float radius) {
+  public NoiseBlackhole(String name, Planet parent, float radius) {
     super(name, parent, radius);
   }
 
@@ -39,25 +38,53 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
   }
 
   public float startDistance = 20.0f;
-  public float invScl = 5.0f;
-  public int level;
-  public @Nullable FastBlackholeBase blackholeShader;
+  public float invScl = 1.0f;
+  public @Nullable NoiseBlackholeBase blackholeShader;
+  public String noiseType;
+  public int bloomScl = 2;
+  public float rayScl = 2.0f;
+  public @Nullable FrameBuffer rayBuffer;
+  public @Nullable OCBloom bloom;
+
+  @Override
+  public void init() {
+    super.init();
+
+  }
+
+  @Override
+  public void load() {
+    super.load();
+    if (bloom == null)
+      bloom = new PyramidFourNAvgBloom(Core.graphics.getWidth() / bloomScl, Core.graphics.getHeight() / bloomScl,true);
+    rayBuffer = new HDRFrameBuffer((int) (Core.graphics.getWidth() / rayScl),
+        (int) (Core.graphics.getHeight() / rayScl), false);
+  }
+
+  @Override
+  public void onResize() {
+    if (bloom != null)
+      bloom.resize(Core.graphics.getWidth() / bloomScl, Core.graphics.getHeight() / bloomScl);
+    if (rayBuffer != null)
+      rayBuffer.resize(
+          (int) (Core.graphics.getWidth() / rayScl),
+          (int) (Core.graphics.getHeight() / rayScl));
+  }
 
   @Override
   public void parse(String name, String mod, JsonValue data) throws Exception {
     if (headless)
       return;
-    if (!data.has("level"))
-      throw new IllegalArgumentException("No argument level for blackhole");
-    level = data.getInt("level");
-    data.remove("level");
-
-    blackholeShader = switch (level) {
-      case 0 -> new FastBlackholeShaderR0();
-      case 1 -> new FastBlackholeShaderR1();
-      case 2 -> new FastBlackholeShaderR2();
-      default -> throw new IllegalArgumentException("Level " + level + " is invalid");
+    if (!data.has("noiseType")) {
+      throw new IllegalArgumentException("NoiseBlackhole must have noiseType");
+    }
+    noiseType = data.getString("noiseType");
+    data.remove("noiseType");
+    blackholeShader = switch (noiseType) {
+      case "gas2" -> new Gas2NoiseBlackhole();
+      default -> throw new IllegalArgumentException("Noise type " + noiseType + " is invalid");
     };
+    blackholeShader.radius = radius;
     blackholeShader.parse(name, mod, data, this);
   }
 
@@ -71,7 +98,7 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
     cam.up.set(Vec3.Y);
 
     cam.resize(w, h);
-    // renderer.bloom.resize(w, h);
+    renderer.bloom.resize(w, h);
     params.camPos.setLength((params.planet.radius + params.planet.camRadius) * POPlanetRenderer.getCamLength(params)
         + (params.zoom - 1f) * (params.planet.radius + params.planet.camRadius) * 2);
 
@@ -97,13 +124,17 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
     // blackholeShader.cubemap = cubemap;
     blackholeShader.cubemapOri = cubemap;
     blackholeShader.camera = cam;
-    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth(),
-        Core.graphics.getHeight());
+    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth() / rayScl,
+        Core.graphics.getHeight() / rayScl);
     Gl.clear(Gl.depthBufferBit);
     cam.update();
-
     renderer.bloom.blending = !params.drawSkybox;
+    rayBuffer.begin();
     Draw.blit(blackholeShader);
+    rayBuffer.end();
+    bloom.capture();
+    POGShaders.screen.input = rayBuffer.getTexture();
+    Draw.blit(POGShaders.screen);
     Gl.enable(Gl.depthTest);
     Gl.depthMask(true);
 
@@ -114,12 +145,14 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
     renderer.renderR(params);
     params.drawSkybox = true;
     renderer.enableBloom = true;
+    bloom.render();
   }
 
   @Override
   public void dispose() {
     super.dispose();
     blackholeShader.dispose();
+    rayBuffer.dispose();
   }
 
 }

@@ -1,0 +1,16 @@
+{
+  "name": "blackhole3",
+  "type": "NoiseBlackhole",
+  "displayName": "黑洞3",
+  "iconColor": "483D8BFF",
+  "radius": 1,
+  "orbitSpacing": 25,
+  "cubemap": "test/",
+  "startDistance": 20,
+  "accessible": false,
+  "maxZoom": 60,
+  "camLength": 2,
+  "noiseType": "gas2",
+  "noise": "textures/iqnoise.png",
+  "colorMap": "textures/bh_color_map.png"
+}

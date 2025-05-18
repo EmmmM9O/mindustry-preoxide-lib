@@ -87,7 +87,7 @@ public class POContentParser implements ContentParserI {
                 case "MultiMesh" -> new MultiMesh(parse(planet, data.get("meshes")));
                 case "MatMesh" -> new MatMesh(parse(planet, data.get("mesh")),
                     parser.readValue(Mat3D.class, data.get("mat")));
-
+                case "HexMesh" -> new HexMesh(planet, data.getInt("divisions", 6));
                 default -> throw new RuntimeException("Unknown mesh type: " + tname);
               };
             };
@@ -113,6 +113,9 @@ public class POContentParser implements ContentParserI {
     {
       put(Color.class, (type, data) -> Color.valueOf(data.asString()));
       put(PlanetGenerator.class, (type, data) -> {
+        if (data.isString()) {
+          return make(resolve(PlanetGenerator.class, data.asString()));
+        }
         var result = new AsteroidGenerator();
         readFields(result, data);
         return result;
@@ -129,7 +132,7 @@ public class POContentParser implements ContentParserI {
     classParsers.put(clazz, cParser);
   }
 
-  private Json parser = new Json() {
+  public Json parser = new Json() {
     @Override
     public <T> T readValue(Class<T> type, Class elementType, JsonValue jsonData, Class keyType) {
       T t = internalRead(type, elementType, jsonData, keyType);
@@ -296,7 +299,7 @@ public class POContentParser implements ContentParserI {
         });
         return out;
       }, ContentType.planet, (POTypeParser<Planet>) (mod, name, value) -> {
-        name=value.getString("name",name);
+        name = value.getString("name", name);
         readDisplayBundle(ContentType.planet, name, value);
         if (value.isString())
           return locate(ContentType.planet, name);
@@ -314,12 +317,13 @@ public class POContentParser implements ContentParserI {
           value.remove("sectorSize");
         if (value.has("radius"))
           value.remove("radius");
-        try {
-          planet_ = toggleTypeListeners(ContentType.planet, planet_, mod, name, value);
-        } catch (Throwable e) {
-          Log.err(e);
-        }
+
+        planet_ = toggleTypeListeners(ContentType.planet, planet_, mod, name, value);
+
         Planet planet = planet_;
+        if (planet instanceof CustomizeParser cParser) {
+          cParser.parse(name, mod, value);
+        }
         if (value.has("mesh")) {
           var mesh = value.get("mesh");
           if (!mesh.isObject() && !mesh.isArray())
@@ -728,6 +732,43 @@ public class POContentParser implements ContentParserI {
 
     // return mapped class if found in the global map
     var out = TypeClassMaps.get(type,
+        !base.isEmpty() && Character.isLowerCase(base.charAt(0)) ? Strings.capitalize(base) : base);
+    if (out != null)
+      return (Class<T>) out;
+
+    // try to resolve it as a raw class name
+    if (base.indexOf('.') != -1) {
+      try {
+        return (Class<T>) Class.forName(base);
+      } catch (Exception ignored) {
+        // try to use mod class loader
+        try {
+          return (Class<T>) Class.forName(base, true, mods.mainLoader());
+        } catch (Exception ignore) {
+        }
+      }
+    }
+
+    if (def != null) {
+      Log.warn("[@] No type from " + type.toString() + " '" + base + "' found, defaulting to type '"
+          + def.getSimpleName() + "'", currentContent == null ? currentMod.name : "");
+      return def;
+    }
+    throw new IllegalArgumentException("Type not found: " + base + "from " + type.toString());
+  }
+
+  <T> Class<T> resolve(Class<?> type, String base) {
+    return resolve(type, base, null);
+  }
+
+  /** Tries to resolve a class from the class type map. */
+  <T> Class<T> resolve(Class<?> type, String base, Class<T> def) {
+    // no base class specified
+    if ((base == null || base.isEmpty()) && def != null)
+      return def;
+
+    // return mapped class if found in the global map
+    var out = TypeClassMaps.getBase(type,
         !base.isEmpty() && Character.isLowerCase(base.charAt(0)) ? Strings.capitalize(base) : base);
     if (out != null)
       return (Class<T>) out;

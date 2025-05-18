@@ -1,0 +1,56 @@
+{
+  "name": "test",
+  "displayName": "测试",
+  "generator": "SerpuloPlanetGenerator",
+  "parent": "poeu-blackhole3",
+  "iconColor": "7d4dffff",
+  "orbitRadius": 40,
+  "hasAtmosphere": true,
+  "updateLighting": false,
+  "atmosphereRadIn": 0.02,
+  "atmosphereRadOut": 0.3,
+  "atmosphereColor": "3c1b8fff",
+  "drawOrbit": true,
+  "accessible": true,
+  "alwaysUnlocked": true,
+  "defaultCore": "core-shard",
+  "sectorSeed": 690,
+  "startSector": 1,
+  "sectorSize": 3,
+  "clearSectorOnLose": true,
+  "allowSectorInvasion": true,
+  "allowLaunchToNumbered": false,
+  "radius": 1,
+  "clipRadius": 6,
+  "orbitSpacing": 2,
+  "mesh": {
+    "type": "HexMesh",
+    "divisions": 8
+  },
+  "cloudMesh": [
+    {
+      "type": "HexSkyMesh",
+      "seed": 17,
+      "speed": 0.21,
+      "radius": 0.2,
+      "divisions": 5,
+      "color": "684EB9BF",
+      "octaves": 2,
+      "persistence": 0.45,
+      "scale": 0.9,
+      "thresh": 0.38
+    },
+    {
+      "type": "HexSkyMesh",
+      "seed": 25,
+      "speed": 0.6,
+      "radius": 0.24,
+      "divisions": 5,
+      "color": "B3A3E4BF",
+      "octaves": 2,
+      "persistence": 0.45,
+      "scale": 1.1,
+      "thresh": 0.41
+    }
+  ]
+}

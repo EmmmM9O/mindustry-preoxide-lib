@@ -40,6 +40,7 @@ import mindustry.world.blocks.storage.*;
 import mindustry.world.blocks.storage.CoreBlock.*;
 import preoxide.*;
 import preoxide.graphics.*;
+import preoxide.universe.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -143,7 +144,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
       @Override
       public boolean scrolled(InputEvent event, float x, float y, float amountX, float amountY) {
         if (event.targetActor == POPlanetDialog.this) {
-          zoom = Mathf.clamp(zoom + amountY / 10f, state.planet.minZoom, 2f);
+          zoom = Mathf.clamp(zoom + amountY / 10f, state.planet.minZoom, getMaxZoom(state.planet));
         }
         return true;
       }
@@ -158,7 +159,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
           lastZoom = zoom;
         }
 
-        zoom = (Mathf.clamp(initialDistance / distance * lastZoom, state.planet.minZoom, 2f));
+        zoom = (Mathf.clamp(initialDistance / distance * lastZoom, state.planet.minZoom, getMaxZoom(state.planet)));
       }
 
       @Override
@@ -232,6 +233,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
       Seq.with(Blocks.junction, Blocks.mechanicalDrill, Blocks.conveyor, Blocks.duo, Items.copper,
           Items.lead).each(UnlockableContent::quietUnlock);
     }
+
   }
 
   /** show with no limitations, just as a map. */
@@ -1468,5 +1470,12 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     select,
     /** Launch between planets. */
     planetLaunch
+  }
+
+  public static float getMaxZoom(Planet planet) {
+    if (planet instanceof CustomizeRenderI cRenderI) {
+      return cRenderI.maxZoom();
+    }
+    return 4.0f;
   }
 }

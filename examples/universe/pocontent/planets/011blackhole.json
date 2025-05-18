@@ -1,14 +1,15 @@
 {
-  "name": "blackhole0",
+  "name": "blackhole1",
   "type": "FastBlackhole",
-  "displayName": "黑洞0",
+  "displayName": "黑洞1",
   "iconColor": "483D8BFF",
   "radius": 1,
   "orbitSpacing": 25,
   "cubemap": "test/",
-  "startDistance": 20,
+  "startDistance": 40,
   "accessible": false,
-  "level":0,
+  "level":1,
   "maxZoom": 60,
-  "camLength": 20
+  "camLength": 20,
+  "rayMaps":["textures/fb_ray_map.png"]
 }
