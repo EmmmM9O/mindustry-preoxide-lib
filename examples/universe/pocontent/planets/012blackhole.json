@@ -8,8 +8,8 @@
   "cubemap": "test/",
   "startDistance": 40,
   "accessible": false,
-  "level":2,
+  "level": 2,
   "maxZoom": 60,
   "camLength": 20,
-  "rayMaps":["textures/fb_ray_map_2.png"]
+  "rayMaps": ["textures/fb_ray_map_2.png"]
 }

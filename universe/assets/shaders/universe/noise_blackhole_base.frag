@@ -29,9 +29,17 @@ vec4 get_color(vec3 pos, vec3 dir) {
     dir *= u_step_size;
     vec3 h = cross(pos, dir);
     float h2 = dot(h, h);
-    float dis = sqrt(h2) / u_step_size;
-    if (dis >= u_start_distance - 0.1) {
-        return texture(u_cubemap_ori, dir / u_step_size);
+    float sp2 = u_step_size * u_step_size;
+    if (h2 >= u_start_distance_2 * sp2) {
+	return vec4(0.0);
+        //return texture(u_cubemap_ori, dir / u_step_size);
+    }
+    float t = dot(-pos, dir / u_step_size);
+    float dt = sqrt(u_start_distance_2 - h2 / sp2);
+    float t2 = t + dt;
+    if (t2 < 0.0) {
+	return vec4(0.0);
+        //return texture(u_cubemap_ori, dir / u_step_size);
     }
     float to = (length(pos) - u_start_distance);
     if (to >= 0.0)
@@ -42,7 +50,7 @@ vec4 get_color(vec3 pos, vec3 dir) {
         float len = dot(pos, pos);
         if (len >= u_max_distance_2)
             break;
-        if (len <= u_radius_2) return vec4(color,1.0);
+        if (len <= u_radius_2) return vec4(color, 1.0);
         float scl = mix(u_min_scl, u_max_scl, 1.0 - smoothstep(0.0f, u_scl_t, inversesqrt(len) / u_scl_r));
         adisk_color(pos, color, alpha, scl);
         float r5 = pow(len, 2.5);
@@ -50,7 +58,7 @@ vec4 get_color(vec3 pos, vec3 dir) {
         pos += dir * scl;
     }
     color *= u_lit;
-    color = clamp(color,vec3(0.0),vec3(u_max_light));
+    color = clamp(color, vec3(0.0), vec3(u_max_light));
     color += texture(u_cubemap, dir).rgb * (1.0 - alpha);
     return vec4(color, 1.0);
 }

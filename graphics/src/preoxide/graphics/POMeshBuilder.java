@@ -15,7 +15,7 @@ public class POMeshBuilder {
         1f, 1f, //
         1f, -1f,//
     });
-    tmp.setIndices(new short[] { 0, 1, 2, 0, 2, 3 });
+    tmp.setIndices(new short[] {0, 1, 2, 0, 2, 3});
     return end();
   }
 

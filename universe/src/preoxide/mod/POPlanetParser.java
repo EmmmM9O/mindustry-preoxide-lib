@@ -20,12 +20,10 @@ public class POPlanetParser {
         return null;
       if (data.isString())
         return POGUtil.getCubeMap(data.asString());
-      if (data.has("right") && data.has("left") && data.has("top") &&
-          data.has("bottom") && data.has("front") && data.has("back")) {
-        return new Cubemap(
-            POGUtil.getCubeMapT(data.getString("right")),
-            POGUtil.getCubeMapT(data.getString("left")),
-            POGUtil.getCubeMapT(data.getString("top")),
+      if (data.has("right") && data.has("left") && data.has("top") && data.has("bottom")
+          && data.has("front") && data.has("back")) {
+        return new Cubemap(POGUtil.getCubeMapT(data.getString("right")),
+            POGUtil.getCubeMapT(data.getString("left")), POGUtil.getCubeMapT(data.getString("top")),
             POGUtil.getCubeMapT(data.getString("bottom")),
             POGUtil.getCubeMapT(data.getString("front")),
             POGUtil.getCubeMapT(data.getString("back")));

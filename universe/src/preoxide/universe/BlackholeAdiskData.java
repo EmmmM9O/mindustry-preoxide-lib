@@ -1,11 +1,11 @@
-
+/* (C) 2025 */
 package preoxide.universe;
 
 import arc.graphics.gl.*;
 
 public class BlackholeAdiskData {
-  public float adiskSpeed = 0.03f, adiskLit = 0.88f, innerRadius = 2.6f, outerRadius = 12.6f, noiseScale = 3f,
-      thickness = 0.20f, coverageLit = 0.75f,lit=1.2f,maxLight=1.2f;
+  public float adiskSpeed = 0.03f, adiskLit = 0.88f, innerRadius = 2.6f, outerRadius = 12.6f,
+      noiseScale = 3f, thickness = 0.20f, coverageLit = 0.75f, lit = 1.2f, maxLight = 1.2f;
 
   public void apply(Shader s) {
     s.setUniformf("u_adisk_inner_radius", innerRadius);

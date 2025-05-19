@@ -8,7 +8,7 @@
   "cubemap": "test/",
   "startDistance": 20,
   "accessible": false,
-  "level":0,
+  "level": 0,
   "maxZoom": 60,
   "camLength": 20
 }

@@ -5,6 +5,5 @@ import arc.graphics.*;
 
 public class POMeshs {
 
-  public static void init() {
-  }
+  public static void init() {}
 }

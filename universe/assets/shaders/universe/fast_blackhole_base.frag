@@ -9,7 +9,6 @@ uniform vec2 u_resolution;
 uniform vec3 u_camera_pos;
 uniform mat3 u_camera_mat;
 uniform samplerCube u_cubemap;
-uniform samplerCube u_cubemap_ori;
 
 vec4 get_ray(vec2 uv, vec3 dir, vec3 h);
 
@@ -18,11 +17,17 @@ vec4 get_color(vec3 pos, vec3 dir) {
     float h2 = dot(h, h);
     float dis = sqrt(h2);
     if (dis >= u_start_distance) {
-        return texture(u_cubemap_ori, dir);
+        return vec4(0.0);
     }
     float pos2 = dot(pos, pos);
     float from = sqrt(pos2 - h2);
     float mf = sqrt(u_start_distance_2 - h2);
+    float t = dot(-pos, dir);
+    float dt = sqrt(u_start_distance_2 - h2);
+    float t2 = t + dt;
+    if (t2 < 0.0) {
+        return vec4(0.0);
+    }
     return get_ray(vec2(dis / u_start_distance, from / mf), dir, h);
 }
 

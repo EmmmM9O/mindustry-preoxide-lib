@@ -58,8 +58,8 @@ public abstract class PyramidBloom<Brightness extends BloomBrightness, Composite
     this(width, height, null, null, null, null, null);
   }
 
-  public PyramidBloom(int width, int height, Brightness brightness,
-      Composite composite, Upsample upsample, Downsample downsample, Tonemapping tonemapping) {
+  public PyramidBloom(int width, int height, Brightness brightness, Composite composite,
+      Upsample upsample, Downsample downsample, Tonemapping tonemapping) {
     this(width, height, false, brightness, composite, upsample, downsample, tonemapping);
   }
 

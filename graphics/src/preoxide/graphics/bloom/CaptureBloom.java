@@ -13,8 +13,7 @@ public abstract class CaptureBloom extends OCBloom {
   public boolean capturing;
   FrameBuffer fboCapture;
 
-  public CaptureBloom() {
-  }
+  public CaptureBloom() {}
 
   public void setClearColor(float r, float g, float b, float a) {
     this.r = r;
@@ -33,7 +32,7 @@ public abstract class CaptureBloom extends OCBloom {
     if (!capturing) {
       capturing = true;
       fboCapture.begin();
-      //prework();
+      prework();
     }
   }
 

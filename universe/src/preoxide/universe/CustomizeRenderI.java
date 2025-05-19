@@ -1,3 +1,4 @@
+/* (C) 2025 */
 package preoxide.universe;
 
 import arc.graphics.g3d.*;
@@ -10,8 +11,8 @@ public interface CustomizeRenderI {
   /**
    * Render the Skybox of POPlanetRenderer
    *
-   * @param cam    Camera3D
-   * @param mesh   Mesh from POPlanetRenderer
+   * @param cam Camera3D
+   * @param mesh Mesh from POPlanetRenderer
    * @param params params
    * @return wheather to continue render
    */
@@ -23,8 +24,7 @@ public interface CustomizeRenderI {
     return false;
   }
 
-  default void afterRender(Camera3D cam, POPlanetRenderer renderer, PlanetParams params) {
-  }
+  default void afterRender(Camera3D cam, POPlanetRenderer renderer, PlanetParams params) {}
 
   default boolean disableRendererAll() {
     return false;

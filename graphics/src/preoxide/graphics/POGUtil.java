@@ -23,14 +23,30 @@ public class POGUtil {
   public static final Vec3 t32 = new Vec3();
   public static final Vec3 t33 = new Vec3();
   public static final Vec3 t34 = new Vec3();
+  public static final Vec3 t35 = new Vec3();
   public static final Vec2 t21 = new Vec2();
   public static int cubeSize = 1024;
   private static ScreenQuad quad;
+  private static CamPlane camPlane;
+  private static FrameBuffer frameBuffer;
+
+  public static FrameBuffer getFrameBuffer() {
+    if (frameBuffer == null)
+      frameBuffer = new FrameBuffer(Format.rgba8888, Core.graphics.getWidth(),
+          Core.graphics.getHeight(), true);
+    return frameBuffer;
+  }
 
   public static ScreenQuad getQuad() {
     if (quad == null)
       quad = new ScreenQuad();
     return quad;
+  }
+
+  public static CamPlane getPlane() {
+    if (camPlane == null)
+      camPlane = new CamPlane();
+    return camPlane;
   }
 
   public static Cubemap getCube(Camera3D cam, Vec3 pos, Runnable render) {
@@ -96,6 +112,8 @@ public class POGUtil {
     Events.on(ResizeEvent.class, e -> {
       width = Core.graphics.getWidth();
       height = Core.graphics.getHeight();
+      if (frameBuffer != null)
+        frameBuffer.resize(width, height);
     });
   }
 }

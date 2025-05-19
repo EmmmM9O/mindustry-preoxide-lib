@@ -27,8 +27,9 @@ vec4 get_color(vec3 pos, vec3 dir) {
     vec3 h = cross(pos, dir);
     float h2 = dot(h, h);
     float dis = sqrt(h2) / u_step_size;
-    if (dis >= u_start_distance - 0.1) {
-        return texture(u_cubemap_ori, dir / u_step_size);
+    float s2 = u_step_size * u_step_size;
+    if (dis >= u_start_distance * s2) {
+        return vec4(0.0);
     }
     float to = (length(pos) - u_start_distance);
     if (to >= 0.0)

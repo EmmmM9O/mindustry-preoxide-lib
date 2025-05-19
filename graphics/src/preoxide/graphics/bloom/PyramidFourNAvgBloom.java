@@ -8,9 +8,11 @@ public class PyramidFourNAvgBloom extends
   public PyramidFourNAvgBloom(int width, int height) {
     super(width, height);
   }
-  public PyramidFourNAvgBloom(int width, int height,boolean depth) {
-    super(width, height,depth);
+
+  public PyramidFourNAvgBloom(int width, int height, boolean depth) {
+    super(width, height, depth);
   }
+
   @Override
   BloomBrightness createBrightness() {
     return new BloomBrightness();

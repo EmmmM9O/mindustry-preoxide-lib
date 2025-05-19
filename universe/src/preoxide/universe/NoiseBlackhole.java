@@ -1,3 +1,4 @@
+/* (C) 2025 */
 package preoxide.universe;
 
 import static mindustry.Vars.*;
@@ -56,9 +57,11 @@ public class NoiseBlackhole extends POPlanet implements CustomizeParser {
   public void load() {
     super.load();
     if (bloom == null)
-      bloom = new PyramidFourNAvgBloom(Core.graphics.getWidth() / bloomScl, Core.graphics.getHeight() / bloomScl,true);
+      bloom = new PyramidFourNAvgBloom(Core.graphics.getWidth() / bloomScl,
+          Core.graphics.getHeight() / bloomScl, true);
     rayBuffer = new HDRFrameBuffer((int) (Core.graphics.getWidth() / rayScl),
         (int) (Core.graphics.getHeight() / rayScl), false);
+
   }
 
   @Override
@@ -66,8 +69,7 @@ public class NoiseBlackhole extends POPlanet implements CustomizeParser {
     if (bloom != null)
       bloom.resize(Core.graphics.getWidth() / bloomScl, Core.graphics.getHeight() / bloomScl);
     if (rayBuffer != null)
-      rayBuffer.resize(
-          (int) (Core.graphics.getWidth() / rayScl),
+      rayBuffer.resize((int) (Core.graphics.getWidth() / rayScl),
           (int) (Core.graphics.getHeight() / rayScl));
   }
 
@@ -99,11 +101,13 @@ public class NoiseBlackhole extends POPlanet implements CustomizeParser {
 
     cam.resize(w, h);
     renderer.bloom.resize(w, h);
-    params.camPos.setLength((params.planet.radius + params.planet.camRadius) * POPlanetRenderer.getCamLength(params)
-        + (params.zoom - 1f) * (params.planet.radius + params.planet.camRadius) * 2);
+    params.camPos.setLength(
+        (params.planet.radius + params.planet.camRadius) * POPlanetRenderer.getCamLength(params)
+            + (params.zoom - 1f) * (params.planet.radius + params.planet.camRadius) * 2);
 
     if (params.otherCamPos != null) {
-      cam.position.set(params.otherCamPos).lerp(params.planet.position, params.otherCamAlpha).add(params.camPos);
+      cam.position.set(params.otherCamPos).lerp(params.planet.position, params.otherCamAlpha)
+          .add(params.camPos);
     } else {
       cam.position.set(params.planet.position).add(params.camPos);
     }
@@ -122,29 +126,30 @@ public class NoiseBlackhole extends POPlanet implements CustomizeParser {
     });
 
     // blackholeShader.cubemap = cubemap;
-    blackholeShader.cubemapOri = cubemap;
     blackholeShader.camera = cam;
-    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth() / rayScl,
-        Core.graphics.getHeight() / rayScl);
-    Gl.clear(Gl.depthBufferBit);
+    blackholeShader.resolution =
+        POGUtil.t21.set(Core.graphics.getWidth() / rayScl, Core.graphics.getHeight() / rayScl);
     cam.update();
     renderer.bloom.blending = !params.drawSkybox;
     rayBuffer.begin();
+    Gl.clearColor(0, 0, 0, 0);
+    Gl.clear(Gl.depthBufferBit | Gl.colorBufferBit);
     Draw.blit(blackholeShader);
     rayBuffer.end();
     bloom.capture();
-    POGShaders.screen.input = rayBuffer.getTexture();
-    Draw.blit(POGShaders.screen);
+    Gl.clear(Gl.depthBufferBit);
+
     Gl.enable(Gl.depthTest);
     Gl.depthMask(true);
 
     Gl.enable(Gl.cullFace);
 
     Gl.cullFace(Gl.back);
-    params.drawSkybox = false;
     renderer.renderR(params);
-    params.drawSkybox = true;
     renderer.enableBloom = true;
+    var plane = POGUtil.getPlane();
+    plane.texture = rayBuffer.getTexture();
+    plane.render(cam);
     bloom.render();
   }
 

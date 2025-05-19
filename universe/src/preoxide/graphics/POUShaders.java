@@ -1,3 +1,4 @@
+/* (C) 2025 */
 package preoxide.graphics;
 
 import arc.graphics.*;
@@ -19,18 +20,19 @@ public class POUShaders {
     testS = new RayTestShader();
   }
 
-  public static abstract class NoiseBlackholeBase extends POLoadShader implements CustomizeChildParser<NoiseBlackhole> {
+  public static abstract class NoiseBlackholeBase extends POLoadShader
+      implements CustomizeChildParser<NoiseBlackhole> {
     public Camera3D camera;
     public Vec3 target;
     public Vec2 resolution;
-    public Cubemap cubemap, cubemapOri;
+    public Cubemap cubemap;
     public float startDistance, scl, radius;
     public BlackholeRayData ray;
     public BlackholeAdiskData adisk;
 
     @Override
     public void apply() {
-      setUniformf("u_fov_scale", (float) (Math.tan(camera.fov * (Math.PI / 180))));
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180)) / 2.0));
       setUniformf("u_start_distance", startDistance);
       setUniformf("u_start_distance_2", startDistance * startDistance);
       setUniformf("u_scl", scl);
@@ -39,8 +41,7 @@ public class POUShaders {
       setUniformMatrix("u_camera_mat", POGUtil.getCamMat(camera));
       cubemap.bind(0);
       setUniformi("u_cubemap", 0);
-      cubemapOri.bind(1);
-      setUniformi("u_cubemap_ori", 1);
+
       setUniformf("u_radius_2", radius * radius);
       setUniformf("u_time", Time.globalTime / 10f);
       ray.apply(this);
@@ -55,12 +56,13 @@ public class POUShaders {
 
     @Override
     protected String preprocess(String source, boolean fragment) {
-      return super.preprocess(source + (fragment ? POGShaders.getShaderFi(addon()).readString() : ""),
-          fragment);
+      return super.preprocess(
+          source + (fragment ? POGShaders.getShaderFi(addon()).readString() : ""), fragment);
     }
 
     @Override
-    public void parse(String name, String mod, JsonValue data, NoiseBlackhole father) throws Exception {
+    public void parse(String name, String mod, JsonValue data, NoiseBlackhole father)
+        throws Exception {
       if (data.has("ray")) {
         this.ray = POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("ray"));
         data.remove("ray");
@@ -68,7 +70,8 @@ public class POUShaders {
         this.ray = new BlackholeRayData();
       }
       if (data.has("adisk")) {
-        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        this.adisk =
+            POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
         data.remove("adisk");
       } else {
         this.adisk = new BlackholeAdiskData();
@@ -98,8 +101,9 @@ public class POUShaders {
     }
 
     @Override
-    public void parse(String name, String mod, JsonValue data, NoiseBlackhole father) throws Exception {
-	    super.parse(name,mod,data,father);
+    public void parse(String name, String mod, JsonValue data, NoiseBlackhole father)
+        throws Exception {
+      super.parse(name, mod, data, father);
       if (data.has("noiseLOD1")) {
         adiskNoiseLOD1 = data.getInt("noiseLOD1");
         data.remove("noiseLOD1");
@@ -126,16 +130,17 @@ public class POUShaders {
     }
   }
 
-  public static abstract class FastBlackholeBase extends POLoadShader implements CustomizeChildParser<FastBlackhole> {
+  public static abstract class FastBlackholeBase extends POLoadShader
+      implements CustomizeChildParser<FastBlackhole> {
     public Camera3D camera;
     public Vec3 target;
     public Vec2 resolution;
-    public Cubemap cubemap, cubemapOri;
+    public Cubemap cubemap;
     public float startDistance, scl;
 
     @Override
     public void apply() {
-      setUniformf("u_fov_scale", (float) (Math.tan(camera.fov * (Math.PI / 180))));
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180)) / 2.0));
       setUniformf("u_start_distance", startDistance);
       setUniformf("u_start_distance_2", startDistance * startDistance);
       setUniformf("u_scl", scl);
@@ -144,8 +149,6 @@ public class POUShaders {
       setUniformMatrix("u_camera_mat", POGUtil.getCamMat(camera));
       cubemap.bind(0);
       setUniformi("u_cubemap", 0);
-      cubemapOri.bind(1);
-      setUniformi("u_cubemap_ori", 1);
     }
 
     public FastBlackholeBase(String frag, String vert) {
@@ -164,12 +167,13 @@ public class POUShaders {
 
     @Override
     protected String preprocess(String source, boolean fragment) {
-      return super.preprocess(source + (fragment ? POGShaders.getShaderFi(addon()).readString() : ""),
-          fragment);
+      return super.preprocess(
+          source + (fragment ? POGShaders.getShaderFi(addon()).readString() : ""), fragment);
     }
 
     @Override
-    public void parse(String name, String mod, JsonValue data, FastBlackhole father) throws Exception {
+    public void parse(String name, String mod, JsonValue data, FastBlackhole father)
+        throws Exception {
       if (!data.has("rayMaps")) {
         throw new IllegalArgumentException("need ray map");
       }
@@ -265,7 +269,8 @@ public class POUShaders {
     public void parse(String name, String mod, JsonValue data, FastBlackhole p) throws Exception {
       radius = p.radius;
       if (data.has("rayData")) {
-        this.rayData = POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
+        this.rayData =
+            POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
         data.remove("rayData");
       } else {
         this.rayData = new BlackholeRayData();

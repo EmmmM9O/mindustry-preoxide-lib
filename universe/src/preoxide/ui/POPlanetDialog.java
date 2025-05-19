@@ -83,7 +83,8 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     state.drawUi = true;
 
     shouldPause = true;
-    state.planet = content.getByName(ContentType.planet, Core.settings.getString("lastplanet", "serpulo"));
+    state.planet =
+        content.getByName(ContentType.planet, Core.settings.getString("lastplanet", "serpulo"));
     if (state.planet == null)
       state.planet = Planets.serpulo;
 
@@ -159,7 +160,8 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
           lastZoom = zoom;
         }
 
-        zoom = (Mathf.clamp(initialDistance / distance * lastZoom, state.planet.minZoom, getMaxZoom(state.planet)));
+        zoom = (Mathf.clamp(initialDistance / distance * lastZoom, state.planet.minZoom,
+            getMaxZoom(state.planet)));
       }
 
       @Override
@@ -185,11 +187,11 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
           && !content.planets().contains(p -> p.sectors.contains(Sector::hasBase))) {
         var diag = new BaseDialog("@campaign.select");
 
-        Planet[] selected = { null };
+        Planet[] selected = {null};
         var group = new ButtonGroup<>();
         group.setMinCheckCount(0);
         state.planet = Planets.sun;
-        Planet[] choices = { Planets.serpulo, Planets.erekir };
+        Planet[] choices = {Planets.serpulo, Planets.erekir};
         int i = 0;
         for (var planet : choices) {
           TextureRegion tex = new TextureRegion(planetTextures[i]);
@@ -221,7 +223,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     });
 
     planetTextures = new Texture[2];
-    String[] names = { "sprites/planets/serpulo.png", "sprites/planets/erekir.png" };
+    String[] names = {"sprites/planets/serpulo.png", "sprites/planets/erekir.png"};
     for (int i = 0; i < names.length; i++) {
       planetTextures[i] = new Texture(Core.files.internal(names[i]), true);
       planetTextures[i].setFilter(TextureFilter.linear, TextureFilter.linear);
@@ -326,8 +328,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     // TODO implement later if necessary
     /*
      * sectors.captured = Captured Sectors sectors.explored = Explored Sectors
-     * sectors.production.total = Total Production sectors.resources.total = Total
-     * Resources
+     * sectors.production.total = Total Production sectors.resources.total = Total Resources
      */
     var dialog = new BaseDialog("@overview");
     dialog.addCloseButton();
@@ -341,7 +342,8 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     hovered = null;
     launching = false;
     this.listener = listener;
-    this.launchCandidates = (launchCandidates == null ? sector.planet.launchCandidates : launchCandidates);
+    this.launchCandidates =
+        (launchCandidates == null ? sector.planet.launchCandidates : launchCandidates);
     launchSector = sector;
 
     // automatically select next planets;
@@ -479,15 +481,16 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
       for (Sector sec : planet.sectors) {
         if (canSelect(sec) || sec.unlocked() || debugSelect) {
 
-          Color color = sec.hasBase()
-              ? Tmp.c2.set(Team.sharded.color).lerp(Team.crux.color,
-                  sec.hasEnemyBase() ? 0.5f : 0f)
-              : sec.preset != null && sec.preset.requireUnlock
-                  ? sec.preset.unlocked()
-                      ? Tmp.c2.set(Team.derelict.color).lerp(Color.white,
-                          Mathf.absin(Time.time, 10f, 1f))
-                      : Color.gray
-                  : sec.hasEnemyBase() ? Team.crux.color : null;
+          Color color =
+              sec.hasBase()
+                  ? Tmp.c2.set(Team.sharded.color).lerp(Team.crux.color,
+                      sec.hasEnemyBase() ? 0.5f : 0f)
+                  : sec.preset != null && sec.preset.requireUnlock
+                      ? sec.preset.unlocked()
+                          ? Tmp.c2.set(Team.derelict.color).lerp(Color.white,
+                              Mathf.absin(Time.time, 10f, 1f))
+                          : Color.gray
+                      : sec.hasEnemyBase() ? Team.crux.color : null;
 
           if (color != null) {
             planets.drawSelection(sec, Tmp.c1.set(color).mul(0.8f).a(state.uiAlpha), 0.026f,
@@ -579,8 +582,9 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
                         || !sec.preset.techNode.parent.content.locked())
                             ? Fonts.getLargeIcon("lock")
                             : preficon;
-        var color = sec.preset != null && sec.preset.requireUnlock && !sec.hasBase() ? Team.derelict.color
-            : Team.sharded.color;
+        var color =
+            sec.preset != null && sec.preset.requireUnlock && !sec.hasBase() ? Team.derelict.color
+                : Team.sharded.color;
 
         if (icon != null) {
           planets.drawPlane(sec, () -> {
@@ -780,7 +784,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
         Structs.comparingInt(s -> s.save == null ? 0 : -(int) s.save.meta.timePlayed)));
 
     notifs.pane(p -> {
-      Runnable[] readd = { null };
+      Runnable[] readd = {null};
 
       p.table(s -> {
         s.image(Icon.zoom).padRight(4);
@@ -1159,7 +1163,8 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
         && sector.info.wavesSurvived - sector.info.wavesPassed >= 0 && !sector.isBeingPlayed()) {
       int toCapture = sector.info.attack || sector.info.winWave <= 1 ? -1
           : sector.info.winWave - (sector.info.wave + sector.info.wavesPassed);
-      boolean plus = (sector.info.wavesSurvived - sector.info.wavesPassed) >= SectorDamage.maxRetWave - 1;
+      boolean plus =
+          (sector.info.wavesSurvived - sector.info.wavesPassed) >= SectorDamage.maxRetWave - 1;
       table.add(Core.bundle.format("sectors.survives",
           Math.min(sector.info.wavesSurvived - sector.info.wavesPassed,
               toCapture <= 0 ? 200 : toCapture) + (plus ? "+" : "")
@@ -1409,10 +1414,11 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
         // free launch.
         control.playSector(sector);
       } else {
-        CoreBlock block = sector.allowLaunchSchematics()
-            ? (from.info.bestCoreType instanceof CoreBlock b ? b
-                : (CoreBlock) from.planet.defaultCore)
-            : (CoreBlock) from.planet.defaultCore;
+        CoreBlock block =
+            sector.allowLaunchSchematics()
+                ? (from.info.bestCoreType instanceof CoreBlock b ? b
+                    : (CoreBlock) from.planet.defaultCore)
+                : (CoreBlock) from.planet.defaultCore;
 
         loadouts.show(block, from, sector, () -> {
           var loadout = universe.getLastLoadout();

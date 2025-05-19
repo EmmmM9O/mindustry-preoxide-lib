@@ -72,11 +72,13 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
 
     cam.resize(w, h);
     // renderer.bloom.resize(w, h);
-    params.camPos.setLength((params.planet.radius + params.planet.camRadius) * POPlanetRenderer.getCamLength(params)
-        + (params.zoom - 1f) * (params.planet.radius + params.planet.camRadius) * 2);
+    params.camPos.setLength(
+        (params.planet.radius + params.planet.camRadius) * POPlanetRenderer.getCamLength(params)
+            + (params.zoom - 1f) * (params.planet.radius + params.planet.camRadius) * 2);
 
     if (params.otherCamPos != null) {
-      cam.position.set(params.otherCamPos).lerp(params.planet.position, params.otherCamAlpha).add(params.camPos);
+      cam.position.set(params.otherCamPos).lerp(params.planet.position, params.otherCamAlpha)
+          .add(params.camPos);
     } else {
       cam.position.set(params.planet.position).add(params.camPos);
     }
@@ -95,25 +97,32 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
     });
 
     // blackholeShader.cubemap = cubemap;
-    blackholeShader.cubemapOri = cubemap;
     blackholeShader.camera = cam;
-    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth(),
-        Core.graphics.getHeight());
+    blackholeShader.resolution =
+        POGUtil.t21.set(Core.graphics.getWidth(), Core.graphics.getHeight());
     Gl.clear(Gl.depthBufferBit);
     cam.update();
 
     renderer.bloom.blending = !params.drawSkybox;
-    Draw.blit(blackholeShader);
+
     Gl.enable(Gl.depthTest);
     Gl.depthMask(true);
 
     Gl.enable(Gl.cullFace);
 
     Gl.cullFace(Gl.back);
-    params.drawSkybox = false;
     renderer.renderR(params);
-    params.drawSkybox = true;
     renderer.enableBloom = true;
+
+    var buf = POGUtil.getFrameBuffer();
+    buf.begin();
+    Gl.clearColor(0, 0, 0, 0);
+    Gl.clear(Gl.depthBufferBit | Gl.colorBufferBit);
+    Draw.blit(blackholeShader);
+    buf.end();
+    var plane = POGUtil.getPlane();
+    plane.texture = buf.getTexture();
+    plane.render(cam);
   }
 
   @Override
