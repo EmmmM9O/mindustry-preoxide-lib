@@ -13,6 +13,7 @@ import arc.math.geom.*;
 import arc.util.*;
 import mindustry.*;
 import mindustry.game.EventType.*;
+import preoxide.graphics.gl.HDRFrameBuffer;
 
 public class POGUtil {
   public static int width;
@@ -28,11 +29,11 @@ public class POGUtil {
   public static int cubeSize = 1024;
   private static ScreenQuad quad;
   private static CamPlane camPlane;
-  private static FrameBuffer frameBuffer;
+  private static HDRFrameBuffer frameBuffer;
 
-  public static FrameBuffer getFrameBuffer() {
+  public static HDRFrameBuffer getFrameBuffer() {
     if (frameBuffer == null)
-      frameBuffer = new FrameBuffer(Format.rgba8888, Core.graphics.getWidth(),
+      frameBuffer = new HDRFrameBuffer(Core.graphics.getWidth(),
           Core.graphics.getHeight(), true);
     return frameBuffer;
   }

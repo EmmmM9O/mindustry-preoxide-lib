@@ -17,6 +17,5 @@ public class BlackholeAdiskData {
     s.setUniformf("u_adisk_thickness", thickness);
     s.setUniformf("u_coverage_lit", coverageLit);
     s.setUniformf("u_max_light", maxLight);
-
   }
 }

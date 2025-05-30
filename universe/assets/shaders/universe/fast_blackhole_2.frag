@@ -3,7 +3,7 @@ float decode(uint b1, uint b2) {
     uint c = (b1 << 8) | b2;
     return float(c) / 32767.5 - 1.0;
 }
-vec4 get_ray(vec2 uv, vec3 dir, vec3 h) {
+vec4 get_ray(vec2 uv, vec3 pos, vec3 dir, vec3 h) {
     vec4 coord = texture(u_ray_map, uv);
     if (coord.x <= 0.0001 && coord.y <= 0.0001 && coord.z <= 0.0001 && coord.w <= 0.0001) {
         return vec4(0.0, 0.0, 0.0, 1.0);

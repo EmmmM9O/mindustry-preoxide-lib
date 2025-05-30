@@ -6,13 +6,10 @@ import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.graphics.g3d.*;
 import arc.math.geom.*;
-import arc.struct.*;
 import arc.util.*;
 import arc.util.serialization.*;
-import mindustry.*;
 import mindustry.graphics.g3d.*;
 import mindustry.type.*;
-import preoxide.*;
 import preoxide.graphics.*;
 import preoxide.graphics.POUShaders.*;
 import preoxide.mod.*;
@@ -63,7 +60,6 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
 
   @Override
   public void rendererAll(Camera3D cam, POPlanetRenderer renderer, PlanetParams params) {
-    var cubemap = this.cubemap == null ? renderer.skyboxCube : this.cubemap;
     int w = params.viewW <= 0 ? Core.graphics.getWidth() : params.viewW;
     int h = params.viewH <= 0 ? Core.graphics.getHeight() : params.viewH;
 
@@ -98,8 +94,7 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
 
     // blackholeShader.cubemap = cubemap;
     blackholeShader.camera = cam;
-    blackholeShader.resolution =
-        POGUtil.t21.set(Core.graphics.getWidth(), Core.graphics.getHeight());
+    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth(), Core.graphics.getHeight());
     Gl.clear(Gl.depthBufferBit);
     cam.update();
 

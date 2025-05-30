@@ -2,6 +2,7 @@
 package preoxide.graphics;
 
 import arc.graphics.*;
+import arc.graphics.Texture.*;
 import arc.graphics.g3d.*;
 import arc.math.geom.*;
 import arc.struct.*;
@@ -32,7 +33,7 @@ public class POUShaders {
 
     @Override
     public void apply() {
-      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180)) / 2.0));
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180) / 2.0)) * 2.0f);
       setUniformf("u_start_distance", startDistance);
       setUniformf("u_start_distance_2", startDistance * startDistance);
       setUniformf("u_scl", scl);
@@ -70,12 +71,53 @@ public class POUShaders {
         this.ray = new BlackholeRayData();
       }
       if (data.has("adisk")) {
-        this.adisk =
-            POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
         data.remove("adisk");
       } else {
         this.adisk = new BlackholeAdiskData();
       }
+    }
+  }
+
+  public static class Gas1NoiseBlackhole extends NoiseBlackholeBase {
+    public int adiskNoiseLOD1 = 4;
+    public Texture noise;
+
+    @Override
+    public void apply() {
+      super.apply();
+      setUniformi("u_adisk_noise_LOD_1", adiskNoiseLOD1);
+      noise.bind(3);
+      setUniformi("u_noise_tex", 3);
+
+      Gl.activeTexture(Gl.texture0);
+    }
+
+    @Override
+    public String addon() {
+      return "universe/gas1.frag";
+    }
+
+    @Override
+    public void parse(String name, String mod, JsonValue data, NoiseBlackhole father)
+        throws Exception {
+      super.parse(name, mod, data, father);
+      if (data.has("noiseLOD1")) {
+        adiskNoiseLOD1 = data.getInt("noiseLOD1");
+        data.remove("noiseLOD1");
+      }
+
+      if (!data.has("noise"))
+        throw new IllegalArgumentException("must have noise");
+      noise = new Texture(Vars.tree.get(data.getString("noise")), true);
+      data.remove("noise");
+
+    }
+
+    @Override
+    public void dispose() {
+      super.dispose();
+      noise.dispose();
     }
   }
 
@@ -140,7 +182,7 @@ public class POUShaders {
 
     @Override
     public void apply() {
-      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180)) / 2.0));
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180)) / 2.0) * 2.0f);
       setUniformf("u_start_distance", startDistance);
       setUniformf("u_start_distance_2", startDistance * startDistance);
       setUniformf("u_scl", scl);
@@ -269,8 +311,7 @@ public class POUShaders {
     public void parse(String name, String mod, JsonValue data, FastBlackhole p) throws Exception {
       radius = p.radius;
       if (data.has("rayData")) {
-        this.rayData =
-            POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
+        this.rayData = POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
         data.remove("rayData");
       } else {
         this.rayData = new BlackholeRayData();
@@ -288,10 +329,160 @@ public class POUShaders {
 
     @Override
     public void apply() {
-      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180)) / 2.0));
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180) / 2.0)) * 2.0f);
       setUniformf("u_resolution", resolution);
       setUniformf("u_camera_pos", camera.position);
       setUniformMatrix("u_camera_mat", POGUtil.getCamMat(camera));
+    }
+  }
+
+  public static abstract class FastAdiskBlackholeBase extends POLoadShader
+      implements CustomizeChildParser<FastAdiskBlackhole> {
+    public Camera3D camera;
+    public Vec3 target;
+    public Vec2 resolution;
+    public Cubemap cubemap;
+    public float startDistance, scl;
+
+    @Override
+    public void apply() {
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180) / 2.0)) * 2.0f);
+      setUniformf("u_start_distance", startDistance);
+      setUniformf("u_start_distance_2", startDistance * startDistance);
+      setUniformf("u_scl", scl);
+      setUniformf("u_resolution", resolution);
+      setUniformf("u_camera_pos", POGUtil.t34.set(camera.position).sub(target));
+      setUniformMatrix("u_camera_mat", POGUtil.getCamMat(camera));
+      setUniformf("u_time", Time.globalTime / 10f);
+      cubemap.bind(0);
+      setUniformi("u_cubemap", 0);
+    }
+
+    public FastAdiskBlackholeBase(String frag, String vert) {
+      super(frag, vert);
+    }
+
+  }
+
+  public static abstract class FastAdiskBlackholeShaderRayMapBase extends FastAdiskBlackholeBase {
+    public BlackholeAdiskData adisk;
+    public Seq<String> rayMaps;
+
+    public abstract String addon();
+
+    public FastAdiskBlackholeShaderRayMapBase() {
+      super("universe/fast_blackhole_base", "screen");
+    }
+
+    @Override
+    public void apply() {
+      super.apply();
+      adisk.apply(this);
+    }
+
+    @Override
+    protected String preprocess(String source, boolean fragment) {
+      return super.preprocess(
+          source + (fragment ? POGShaders.getShaderFi(addon()).readString() : ""), fragment);
+    }
+
+    @Override
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole father)
+        throws Exception {
+      if (!data.has("rayMaps")) {
+        throw new IllegalArgumentException("need ray map");
+      }
+      rayMaps = Seq.with(data.get("rayMaps").asStringArray());
+      data.remove("rayMaps");
+      if (rayMaps.isEmpty()) {
+        throw new IllegalArgumentException("Blackhole need a ray map use rayMaps:[\"xxx\"] ");
+      }
+      if (data.has("adisk")) {
+        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        data.remove("adisk");
+      } else {
+        this.adisk = new BlackholeAdiskData();
+      }
+    }
+  }
+
+  public static class FastAdiskBlackholeShaderR1 extends FastAdiskBlackholeShaderRayMapBase {
+
+    public Texture rayMap;
+
+    @Override
+    public String addon() {
+      return "universe/fast_adisk_blackhole_1.frag";
+    }
+
+    @Override
+    public void apply() {
+      super.apply();
+      rayMap.bind(2);
+      setUniformi("u_ray_map", 2);
+      Gl.activeTexture(Gl.texture0);
+    }
+
+    @Override
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p) throws Exception {
+      super.parse(name, mod, data, p);
+      if (rayMaps.size != 1)
+        Log.warn("level @ only need 1 rayMap get @", p.level, rayMaps.size);
+      rayMap = new Texture(Vars.tree.get(rayMaps.get(0)), true);
+    }
+
+    @Override
+    public void dispose() {
+      super.dispose();
+      rayMap.dispose();
+    }
+  }
+
+  public static class FastAdiskBlackholeShaderR2 extends FastAdiskBlackholeShaderRayMapBase {
+
+    public Texture rayMap;
+    public int adiskNoiseLOD1 = 2;
+    public Texture noise;
+
+    @Override
+    public String addon() {
+      return "universe/fast_adisk_blackhole_2.frag";
+    }
+
+    @Override
+    public void apply() {
+      super.apply();
+      rayMap.bind(2);
+      setUniformi("u_ray_map", 2);
+      super.apply();
+      setUniformi("u_adisk_noise_LOD_1", adiskNoiseLOD1);
+      noise.bind(3);
+      setUniformi("u_noise_tex", 3);
+
+      Gl.activeTexture(Gl.texture0);
+    }
+
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p) throws Exception {
+      super.parse(name, mod, data, p);
+      if (rayMaps.size != 1)
+        Log.warn("level @ only need 1 rayMap get @", p.level, rayMaps.size);
+      rayMap = new Texture(Vars.tree.get(rayMaps.get(0)), true);
+      if (data.has("noiseLOD1")) {
+        adiskNoiseLOD1 = data.getInt("noiseLOD1");
+        data.remove("noiseLOD1");
+      }
+
+      if (!data.has("noise"))
+        throw new IllegalArgumentException("must have noise");
+      noise = new Texture(Vars.tree.get(data.getString("noise")), true);
+      data.remove("noise");
+    }
+
+    @Override
+    public void dispose() {
+      super.dispose();
+      rayMap.dispose();
+      noise.dispose();
     }
   }
 

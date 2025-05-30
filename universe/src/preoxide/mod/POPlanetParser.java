@@ -13,6 +13,7 @@ public class POPlanetParser {
     TypeClassMaps.put(ContentType.planet, "POPlanet", preoxide.universe.POPlanet.class);
     TypeClassMaps.put(ContentType.planet, "FastBlackhole", preoxide.universe.FastBlackhole.class);
     TypeClassMaps.put(ContentType.planet, "NoiseBlackhole", preoxide.universe.NoiseBlackhole.class);
+    TypeClassMaps.put(ContentType.planet, "FastAdiskBlackhole", preoxide.universe.FastAdiskBlackhole.class);
     var parser = mod.parser;
 
     parser.addClassParser(Cubemap.class, (type, data) -> {

@@ -159,17 +159,15 @@ void adisk_color(vec3 pos, inout vec3 color, inout float alpha, float scl) {
     alpha = (1.0 - alpha) * coverage + alpha;
     alpha = min(alpha, 1.0);
     //Haze
-    /*
-                    vec2 t = vec2(1.0, 0.01);
+    vec2 t = vec2(1.0, 0.01);
 
-                    float torusDist = length(sdTorus(pos + vec3(0.0, -0.05, 0.0), t));
+    float torusDist = length(sdTorus(pos + vec3(0.0, -0.05, 0.0), t));
 
-                    float bloomDisc = 1.0 / (pow(torusDist, 2.0) + 0.001);
-                    vec3 col = MainColor;
-                    bloomDisc *= length(pos) < 0.5 ? 0.0 : 1.0;
+    float bloomDisc = 1.0 / (pow(torusDist, 2.0) + 0.001);
+    vec3 col = MainColor;
+    bloomDisc *= length(pos) < 0.5 ? 0.0 : 1.0;
 
-                    color += col * bloomDisc * (2.9 / 600.0) * (1.0 - alpha * 1.0);
-                    */
+    color += col * bloomDisc * (2.9 / 600.0) * (1.0 - alpha * 1.0);
 }
 
 ///---
