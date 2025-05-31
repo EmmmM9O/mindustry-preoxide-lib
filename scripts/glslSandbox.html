@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- CodeMirror 核心 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+
+<!-- GLSL 语法高亮 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+
+<!-- 主题 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+
+<!-- 插件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/comment.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL2 Shader Renderer (Offscreen)</title>
+    <style>
+    .shader-editor-container {
+    height: 300px;
+    margin-top: 10px;
+    border: 1px solid #444;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* 编辑器样式覆盖 */
+.CodeMirror {
+    height: 100%;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 14px;
+}
+
+/* 行号样式 */
+.CodeMirror-gutters {
+    background-color: #282a36;
+    border-right: 1px solid #444;
+}
+
+/* 光标样式 */
+.CodeMirror-cursor {
+    border-left: 2px solid #f8f8f2;
+}
+        /* 保持原有样式不变 */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .control-panel {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        canvas {
+            width: 100%;
+            border: 1px solid #ddd;
+            background-color: #000;
+            display: block;
+            margin: 0 auto;
+        }
+        button, input, select {
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+
+        .resolution-control input {
+            width: 60px;
+        }
+        .shader-editor {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+        /* 新增样式 */
+.resolution-control {
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-radius: 5px;
+}
+
+.resolution-control label {
+    display: inline-block;
+    width: 100px;
+    font-weight: bold;
+}
+
+#renderWidth, #renderHeight {
+    width: 80px;
+    margin-right: 10px;
+}
+
+#downloadShaderBtn {
+    background-color: #2196F3;
+    margin-top: 10px;
+}
+
+#downloadShaderBtn:hover {
+    background-color: #0b7dda;
+}
+        /* 其他样式保持不变... */
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="control-panel">
+            <!-- 控件保持不变... -->
+            <div>
+                <input type="file" id="shaderFile" accept=".glsl">
+                <button id="loadShader">Load</button>
+            </div>
+                <!-- 新增下载GLSL代码按钮 -->
+    <button id="downloadShaderBtn">Download</button>
+    
+    <!-- 新增离屏画布分辨率设置 -->
+    <div class="resolution-control" style="margin-top: 15px;">
+        <label for="renderWidth">Render Width:</label>
+        <input type="number" id="renderWidth" value="1024" min="64" max="8192">
+        
+        <label for="renderHeight">Render Height:</label>
+        <input type="number" id="renderHeight" value="1024" min="64" max="8192">
+        
+        <button id="applyRenderResolution">Apply Render Resolution</button>
+    </div>
+            <div class="resolution-control" style="margin-top: 15px;">
+                <label for="width">Width:</label>
+                <input type="number" id="width" value="512" min="64" max="4096">
+                
+                <label for="height">Height:</label>
+                <input type="number" id="height" value="512" min="64" max="4096">
+                
+                <button id="applyResolution">Apply Resolution</button>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <button id="downloadBtn">Download PNG</button>
+                <button id="pauseBtn">Pause</button>
+            </div>
+            
+            <div id="status" class="status"></div>
+        </div>
+        
+        <!-- 主显示画布 -->
+        <canvas id="displayCanvas"></canvas>
+        
+        <!-- 离屏画布（不可见） -->
+        
+        <div style="margin-top: 20px;">
+            <h3>Shader Editor:</h3>
+<!-- 替换为 CodeMirror 容器 -->
+<div class="shader-editor-container">
+    <textarea id="shaderEditor"></textarea>
+</div>
+            <button id="compileShader">Compile Shader</button>
+        </div>
+    </div>
+    <script>
+    let codeMirrorEditor;
+
+function initShaderEditor() {
+    // 初始化 CodeMirror
+    codeMirrorEditor = CodeMirror.fromTextArea(document.getElementById('shaderEditor'), {
+        mode: 'text/x-glsl',
+        theme: 'dracula',
+        lineNumbers: true,
+        indentUnit: 4,
+        tabSize: 4,
+        lineWrapping: true,
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        extraKeys: {
+            'Ctrl-Enter': compileCurrentShader,
+            'Cmd-Enter': compileCurrentShader,
+            'Ctrl-/': 'toggleComment',
+            'Cmd-/': 'toggleComment',
+            'Ctrl-S': formatShaderCode,
+            'Cmd-S': formatShaderCode
+        }
+    });
+
+    // 设置初始内容
+    setShaderCode(`#version 300 es
+precision highp float;
+
+uniform float time;
+uniform vec2 resolution;
+uniform vec2 u_mouse;
+
+out vec4 fragColor;
+
+void main() {
+    vec2 st = gl_FragCoord.xy / resolution.xy;
+    st.x *= resolution.x / resolution.y;
+    
+    vec3 color = vec3(0.0);
+    float radius = 0.2;
+    vec2 center1 = vec2(0.3 + 0.1 * sin(time), 0.5);
+    vec2 center2 = vec2(0.7 + 0.1 * cos(time * 0.7), 0.5);
+    
+    float d1 = distance(st, center1);
+    float d2 = distance(st, center2);
+    
+    color += vec3(smoothstep(radius, radius - 0.01, d1), 0.0, 0.0);
+    color += vec3(0.0, smoothstep(radius, radius - 0.01, d2), 0.0);
+    
+    if (length(u_mouse) > 0.0) {
+        vec2 mousePos = u_mouse / resolution.xy;
+        mousePos.x *= resolution.x / resolution.y;
+        float d3 = distance(st, mousePos);
+        color += vec3(0.0, 0.0, smoothstep(0.1, 0.09, d3));
+    }
+    
+    fragColor = vec4(color, 1.0);
+}`);
+}
+
+// 设置着色器代码
+function setShaderCode(code) {
+    codeMirrorEditor.setValue(code);
+}
+
+// 获取当前着色器代码
+function getShaderCode() {
+    return codeMirrorEditor.getValue();
+}
+
+// 编译当前着色器
+function compileCurrentShader() {
+    const shaderCode = getShaderCode();
+    compileShader(shaderCode);
+}
+
+// 格式化代码 (简单实现)
+function formatShaderCode() {
+    const code = getShaderCode();
+    // 这里可以添加更复杂的格式化逻辑
+    const formatted = code
+        .replace(/\bvoid\b/g, '\nvoid ')
+        .replace(/\{\s*/g, '{\n')
+        .replace(/\s*\}/g, '\n}');
+    setShaderCode(formatted);
+}
+        // 全局变量
+        let displayGl, offscreenGl;
+        let shaderProgram;
+        let displayCanvas, offscreenCanvas;
+        let startTime;
+        let mousePos = [0, 0];
+        let currentShader = '';
+        let isPaused = false;
+        let animationFrameId;
+        let vertexArrayObject;
+        
+        // 初始化WebGL2
+        async function initWebGL2() {
+            displayCanvas = document.getElementById('displayCanvas');
+            
+            offscreenCanvas = document.createElement('canvas');
+            document.body.appendChild(offscreenCanvas);
+            
+            applyResolution();
+            applyRenderResolution();
+            try {
+                // 初始化显示用WebGL2上下文
+                displayGl = displayCanvas.getContext('webgl2');
+                // 初始化离屏WebGL2上下文
+                offscreenGl = offscreenCanvas.getContext('webgl2');
+                
+                if (!displayGl || !offscreenGl) {
+                    throw new Error('WebGL2 not supported in your browser');
+                }
+                
+                startTime = Date.now();
+                
+                // 鼠标交互
+                displayCanvas.addEventListener('mousemove', function(e) {
+                    const rect = displayCanvas.getBoundingClientRect();
+                    mousePos = [e.clientX - rect.left, e.clientY - rect.top];
+                });
+                
+                displayCanvas.addEventListener('mouseout', function() {
+                    mousePos = [0, 0];
+                });
+                
+                // 创建VAO
+                vertexArrayObject = displayGl.createVertexArray();
+                displayGl.bindVertexArray(vertexArrayObject);
+                
+                // 加载默认着色器
+                currentShader = getShaderCode();
+                await compileShader(currentShader);
+                
+                updateStatus('WebGL2 initialized successfully', 'success');
+            } catch (e) {
+                updateStatus('Error initializing WebGL2: ' + e.message, 'error');
+            }
+        }
+        
+        // 应用分辨率设置
+        function applyResolution() {
+            const width = parseInt(document.getElementById('width').value);
+            const height = parseInt(document.getElementById('height').value);
+            
+            // 设置显示��布尺寸（CSS像素）
+            displayCanvas.width = Math.min(width, 2048);  // 限制显示尺寸
+            displayCanvas.height = Math.min(height, 2048);
+            
+            // 设置离屏画布尺寸（实际渲染尺寸）
+            
+            if (displayGl && offscreenGl) {
+                displayGl.viewport(0, 0, displayCanvas.width, displayCanvas.height);
+                
+                if (!isPaused) {
+                    render();
+                }
+            }
+        }
+        async function compileForContext(glContext, fragSource, vertSource) {
+    return new Promise((resolve, reject) => {
+        try {
+            // 顶点着色器
+            const vertexShader = glContext.createShader(glContext.VERTEX_SHADER);
+            glContext.shaderSource(vertexShader, vertSource);
+            glContext.compileShader(vertexShader);
+            
+            if (!glContext.getShaderParameter(vertexShader, glContext.COMPILE_STATUS)) {
+                throw new Error('Vertex shader compile error: ' + glContext.getShaderInfoLog(vertexShader));
+            }
+
+            // 片段着色器
+            const fragmentShader = glContext.createShader(glContext.FRAGMENT_SHADER);
+            glContext.shaderSource(fragmentShader, fragSource);
+            glContext.compileShader(fragmentShader);
+            
+            if (!glContext.getShaderParameter(fragmentShader, glContext.COMPILE_STATUS)) {
+                throw new Error('Fragment shader compile error: ' + glContext.getShaderInfoLog(fragmentShader));
+            }
+
+            // 创建并链接程序
+            const program = glContext.createProgram();
+            glContext.attachShader(program, vertexShader);
+            glContext.attachShader(program, fragmentShader);
+            glContext.linkProgram(program);
+            
+            if (!glContext.getProgramParameter(program, glContext.LINK_STATUS)) {
+                throw new Error('Program link error: ' + glContext.getProgramInfoLog(program));
+            }
+
+            // 设置离屏上下文的当前程序
+            if (glContext === offscreenGl) {
+                glContext.useProgram(program);
+            }
+            
+            // 如果是显示上下文，更新全局program引用
+            if (glContext === displayGl) {
+                if (shaderProgram) {
+                    displayGl.deleteProgram(shaderProgram);
+                }
+                shaderProgram = program;
+                displayGl.useProgram(shaderProgram);
+            }
+
+            // 清理着色器对象
+            glContext.deleteShader(vertexShader);
+            glContext.deleteShader(fragmentShader);
+            
+            resolve();
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+        // 编译着色器
+        async function compileShader(shaderSource) {
+            // 顶点着色器
+            const vsSource = `#version 300 es
+                in vec2 a_position;
+                void main() {
+                    gl_Position = vec4(a_position, 0.0, 1.0);
+                }
+            `;
+            
+            // 为两个上下文编译着色器
+            await Promise.all([
+                compileForContext(displayGl, shaderSource, vsSource),
+                compileForContext(offscreenGl, shaderSource, vsSource)
+            ]);
+            
+            updateStatus('Shader compiled successfully for both contexts', 'success');
+            if (!isPaused) {
+                render();
+            }
+        }
+        
+        // 为特定上下文编译着色器
+        
+        function render() {
+            if (!displayGl || !offscreenGl || !shaderProgram) return;
+            
+            // 1. 先渲染到离屏画布（全分辨率）
+            //renderToContext(offscreenGl, offscreenCanvas.width, offscreenCanvas.height);
+            
+            // 2. 然后渲染到显示画布（缩小分辨率）
+            renderToContext(displayGl, displayCanvas.width, displayCanvas.height);
+            
+            // 3. 请求下一帧
+            if (!isPaused) {
+                animationFrameId = requestAnimationFrame(render);
+            }
+        }
+        // 修改后的渲染函数
+function renderToContext(glContext, width, height) {
+    if (!glContext || !shaderProgram) return;
+    
+    glContext.viewport(0, 0, width, height);
+    glContext.clearColor(0.0, 0.0, 0.0, 1.0);
+    glContext.clear(glContext.COLOR_BUFFER_BIT);
+
+    // 创建全屏四边形
+    const positionBuffer = glContext.createBuffer();
+    glContext.bindBuffer(glContext.ARRAY_BUFFER, positionBuffer);
+    const positions = [-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0];
+    glContext.bufferData(glContext.ARRAY_BUFFER, new Float32Array(positions), glContext.STATIC_DRAW);
+
+    // 确保使用正确的程序
+    const programToUse = glContext === displayGl ? shaderProgram : glContext.getParameter(glContext.CURRENT_PROGRAM);
+    if (!programToUse) {
+        console.error("No valid shader program found");
+        return;
+    }
+    
+    glContext.useProgram(programToUse);
+
+    // 获取属性位置
+    const positionAttributeLocation = glContext.getAttribLocation(programToUse, "a_position");
+    if (positionAttributeLocation === -1) {
+        console.error("Could not get attribute location for a_position");
+        return;
+    }
+    
+    glContext.enableVertexAttribArray(positionAttributeLocation);
+    glContext.vertexAttribPointer(positionAttributeLocation, 2, glContext.FLOAT, false, 0, 0);
+
+    // 设置uniform变量
+    const currentTime = (Date.now() - startTime) / 1000;
+    glContext.uniform1f(glContext.getUniformLocation(programToUse, "time"), currentTime);
+    glContext.uniform2f(glContext.getUniformLocation(programToUse, "resolution"), width, height);
+    glContext.uniform2f(glContext.getUniformLocation(programToUse, "u_mouse"), mousePos[0], mousePos[1]);
+
+    glContext.drawArrays(glContext.TRIANGLE_STRIP, 0, 4);
+}
+
+// 修改后的着色器编译函数
+
+        // 渲染到特定上下文
+
+        // 下载画布内容
+        function downloadCanvas() {
+            return new Promise((resolve) => {
+                // 使用离屏画布进行渲染（确保最高质量）
+                renderToContext(offscreenGl, offscreenCanvas.width, offscreenCanvas.height);
+                
+                // 创建一个临时canvas用于转换
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = offscreenCanvas.width;
+                tempCanvas.height = offscreenCanvas.height;
+                const ctx = tempCanvas.getContext('2d');
+                
+                // 从WebGL读取像素
+                const pixels = new Uint8Array(offscreenCanvas.width * offscreenCanvas.height * 4);
+                offscreenGl.readPixels(0, 0, offscreenCanvas.width, offscreenCanvas.height, 
+                                     offscreenGl.RGBA, offscreenGl.UNSIGNED_BYTE, pixels);
+                
+                // 将像素绘制到2D canvas（需要翻转Y轴）
+                const imageData = ctx.createImageData(offscreenCanvas.width, offscreenCanvas.height);
+                for (let y = 0; y < offscreenCanvas.height; y++) {
+                    for (let x = 0; x < offscreenCanvas.width; x++) {
+                        const srcPos = (y * offscreenCanvas.width + x) * 4;
+                        const dstPos = ((offscreenCanvas.height - y - 1) * offscreenCanvas.width + x) * 4;
+                        
+                        imageData.data[dstPos] = pixels[srcPos];     // R
+                        imageData.data[dstPos + 1] = pixels[srcPos + 1]; // G
+                        imageData.data[dstPos + 2] = pixels[srcPos + 2]; // B
+                        imageData.data[dstPos + 3] = pixels[srcPos + 3]; // A
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+                
+                // 创建下载链接
+                tempCanvas.toBlob((blob) => {
+                    const link = document.createElement('a');
+                    link.download = `shader-${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+                    link.href = URL.createObjectURL(blob);
+                    link.click();
+                    
+                    // 清理
+                    setTimeout(() => {
+                        URL.revokeObjectURL(link.href);
+                        resolve();
+                    }, 100);
+                }, 'image/png', 1.0);
+            });
+        }
+        
+        // 更新状态信息
+        function updateStatus(message, type) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = 'status ' + type;
+        }
+        
+        // 暂停/继续
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').textContent = isPaused ? 'Resume' : 'Pause';
+            
+            if (!isPaused) {
+                render();
+            } else if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+        
+        // 事件监听
+        document.getElementById('loadShader').addEventListener('click', async function() {
+            const fileInput = document.getElementById('shaderFile');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        currentShader = e.target.result;
+                        setShaderCode(e.target.result);
+                        await compileShader(currentShader);
+                    };
+                    reader.readAsText(file);
+                } catch (e) {
+                    updateStatus('Error loading shader: ' + e.message, 'error');
+                }
+            } else {
+                updateStatus('Please select a shader file first', 'error');
+            }
+        });
+        
+        document.getElementById('applyResolution').addEventListener('click', applyResolution);
+        
+        document.getElementById('downloadBtn').addEventListener('click', async function() {
+            try {
+                updateStatus('Preparing download...', 'success');
+                await downloadCanvas();
+                updateStatus('Download completed', 'success');
+            } catch (e) {
+                updateStatus('Download failed: ' + e.message, 'error');
+            }
+        });
+        
+        document.getElementById('compileShader').addEventListener('click', compileCurrentShader);
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+        
+        // 初始化
+        window.onload = function() {
+    initShaderEditor();  // 先初始化编辑器
+    initWebGL2();       // 然后初始化WebGL
+};
+        // 下载GLSL代码
+function downloadShaderCode() {
+    const shaderCode = getShaderCode();
+    const blob = new Blob([shaderCode], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.download = `shader-${new Date().toISOString().replace(/[:.]/g, '-')}.glsl`;
+    link.href = url;
+    link.click();
+    
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+    }, 100);
+}
+
+// 添加事件监听
+document.getElementById('downloadShaderBtn').addEventListener('click', downloadShaderCode);
+function applyResolution() {
+    const width = parseInt(document.getElementById('width').value);
+    const height = parseInt(document.getElementById('height').value);
+    
+    // 显示画布尺寸
+    displayCanvas.width = Math.min(width, 2048);
+    displayCanvas.height = Math.min(height, 2048);
+    
+    if (displayGl) {
+        displayGl.viewport(0, 0, displayCanvas.width, displayCanvas.height);
+        if (!isPaused) {
+            render();
+        }
+    }
+}
+
+// 新增设置离屏画布分辨率函数
+function applyRenderResolution() {
+    const renderWidth = parseInt(document.getElementById('renderWidth').value);
+    const renderHeight = parseInt(document.getElementById('renderHeight').value);
+    
+    // 离屏画布尺寸
+    offscreenCanvas.width = renderWidth;
+    offscreenCanvas.height = renderHeight;
+    
+    if (offscreenGl) {
+        offscreenGl.viewport(0, 0, renderWidth, renderHeight);
+        updateStatus(`Render resolution set to ${renderWidth}x${renderHeight}`, 'success');
+    }
+}
+
+// 添加事件监听
+document.getElementById('applyRenderResolution').addEventListener('click', applyRenderResolution);
+    </script>
+</body>
+</html>
