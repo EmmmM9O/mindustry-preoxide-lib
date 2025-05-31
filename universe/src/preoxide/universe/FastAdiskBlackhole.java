@@ -78,6 +78,7 @@ public class FastAdiskBlackhole extends POPlanet implements CustomizeParser {
 
     blackholeShader = switch (level) {
       case 1 -> new FastAdiskBlackholeShaderR1();
+      case 20 -> new FastAdiskNoiseBlackholeShaderR2();
       case 2 -> new FastAdiskBlackholeShaderR2();
       default -> throw new IllegalArgumentException("Level " + level + " is invalid");
     };

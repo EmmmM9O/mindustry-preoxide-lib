@@ -11,10 +11,14 @@
   "level": 2,
   "maxZoom": 80,
   "camLength": 10,
-  "rayMaps": ["textures/fb_ray_map_4.png"],
-  "noise": "textures/iqnoise.png",
+  "rayMaps": [
+    "textures/fb_ray_map_4.png"
+  ],
+  "colorMap": "textures/fb_color_map.png",
+  "colorScl": 4.0,
   "adisk": {
-    "noiseScale": 1.8,
-    "maxLight": 3.0
+    "maxLight": 50.0,
+    "innerRadius": 1.0,
+    "outerRadius": 8.6
   }
 }

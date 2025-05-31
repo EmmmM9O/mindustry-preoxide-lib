@@ -66,7 +66,7 @@ public class POGShaders {
 
   public static class BloomComposite extends POLoadShader {
     public Texture input, bloom;
-    public float intensity = 0.10f, exposure = 0.72f;
+    public float intensity = 0.25f, exposure = 0.8f;
 
     public BloomComposite() {
       super("bloom/bloom_composite", "screen");
@@ -126,7 +126,7 @@ public class POGShaders {
 
   public static class BloomTonemapping extends POLoadShader {
     public boolean enabled = true;
-    public float gamma = 2.2f;
+    public float gamma = 2.8f;
     public Texture input;
 
     public BloomTonemapping() {

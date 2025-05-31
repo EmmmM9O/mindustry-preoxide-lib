@@ -441,8 +441,8 @@ public class POUShaders {
   public static class FastAdiskBlackholeShaderR2 extends FastAdiskBlackholeShaderRayMapBase {
 
     public Texture rayMap;
-    public int adiskNoiseLOD1 = 2;
-    public Texture noise;
+    public Texture colorMap;
+    public float colorScl = 1.2f;
 
     @Override
     public String addon() {
@@ -452,9 +452,55 @@ public class POUShaders {
     @Override
     public void apply() {
       super.apply();
+      setUniformf("u_color_scl", colorScl);
       rayMap.bind(2);
       setUniformi("u_ray_map", 2);
+      colorMap.bind(3);
+      setUniformi("u_color_map", 3);
+
+      Gl.activeTexture(Gl.texture0);
+    }
+
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p) throws Exception {
+      super.parse(name, mod, data, p);
+      if (rayMaps.size != 1)
+        Log.warn("level @ only need 1 rayMap get @", p.level, rayMaps.size);
+      rayMap = new Texture(Vars.tree.get(rayMaps.get(0)), true);
+      if (data.has("colorScl")) {
+        colorScl = data.getInt("colorScl");
+        data.remove("colorScl");
+      }
+
+      if (!data.has("colorMap"))
+        throw new IllegalArgumentException("must have colorMap");
+      colorMap = new Texture(Vars.tree.get(data.getString("colorMap")), true);
+      data.remove("colorMap");
+    }
+
+    @Override
+    public void dispose() {
+      super.dispose();
+      rayMap.dispose();
+      colorMap.dispose();
+    }
+  }
+
+  public static class FastAdiskNoiseBlackholeShaderR2 extends FastAdiskBlackholeShaderRayMapBase {
+
+    public Texture rayMap;
+    public int adiskNoiseLOD1 = 2;
+    public Texture noise;
+
+    @Override
+    public String addon() {
+      return "universe/fast_adisk_blackhole_noise_2.frag";
+    }
+
+    @Override
+    public void apply() {
       super.apply();
+      rayMap.bind(2);
+      setUniformi("u_ray_map", 2);
       setUniformi("u_adisk_noise_LOD_1", adiskNoiseLOD1);
       noise.bind(3);
       setUniformi("u_noise_tex", 3);
