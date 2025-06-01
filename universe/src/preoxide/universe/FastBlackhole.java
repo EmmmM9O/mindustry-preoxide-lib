@@ -94,7 +94,8 @@ public class FastBlackhole extends POPlanet implements CustomizeParser {
 
     // blackholeShader.cubemap = cubemap;
     blackholeShader.camera = cam;
-    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth(), Core.graphics.getHeight());
+    blackholeShader.resolution =
+        POGUtil.t21.set(Core.graphics.getWidth(), Core.graphics.getHeight());
     Gl.clear(Gl.depthBufferBit);
     cam.update();
 

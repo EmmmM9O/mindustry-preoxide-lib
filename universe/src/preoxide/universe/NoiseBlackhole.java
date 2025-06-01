@@ -127,7 +127,8 @@ public class NoiseBlackhole extends POPlanet implements CustomizeParser {
 
     // blackholeShader.cubemap = cubemap;
     blackholeShader.camera = cam;
-    blackholeShader.resolution = POGUtil.t21.set(Core.graphics.getWidth() / rayScl, Core.graphics.getHeight() / rayScl);
+    blackholeShader.resolution =
+        POGUtil.t21.set(Core.graphics.getWidth() / rayScl, Core.graphics.getHeight() / rayScl);
     cam.update();
     renderer.bloom.blending = !params.drawSkybox;
     rayBuffer.begin();

@@ -31,11 +31,11 @@ import mindustry.world.consumers.*;
 import mindustry.world.meta.*;
 import static mindustry.Vars.*;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class POContentParser implements ContentParserI {
   public static final boolean ignoreUnknownFields = true;
-  public static final ContentType[] typesToSearch = { ContentType.planet };
-  public static final String[] fileExtensions = { "json", "json5" };
+  public static final ContentType[] typesToSearch = {ContentType.planet};
+  public static final String[] fileExtensions = {"json", "json5"};
   ObjectSet<Class<?>> implicitNullable = ObjectSet.with(TextureRegion.class, TextureRegion[].class,
       TextureRegion[][].class, TextureRegion[][][].class);
   public Seq<POParseListener> listeners = new Seq<>();
@@ -177,7 +177,8 @@ public class POContentParser implements ContentParserI {
             && jsonData.asString().contains("/")) {
           String[] split = jsonData.asString().split("/");
           int number = Strings.parseInt(split[1], 1);
-          UnlockableContent cont = content.unit(split[0]) == null ? content.block(split[0]) : content.unit(split[0]);
+          UnlockableContent cont =
+              content.unit(split[0]) == null ? content.block(split[0]) : content.unit(split[0]);
 
           return (T) new PayloadStack(cont == null ? Blocks.router : cont, number);
         }
@@ -252,8 +253,8 @@ public class POContentParser implements ContentParserI {
     return current;
   }
 
-  ObjectMap<ContentType, POTypeParser<?>> parsers = ObjectMap.of(ContentType.sector,
-      (POTypeParser<SectorPreset>) (mod, name, value) -> {
+  ObjectMap<ContentType, POTypeParser<?>> parsers =
+      ObjectMap.of(ContentType.sector, (POTypeParser<SectorPreset>) (mod, name, value) -> {
         if (value.isString()) {
           return locate(ContentType.sector, name);
         }
@@ -304,9 +305,10 @@ public class POContentParser implements ContentParserI {
         if (value.isString())
           return locate(ContentType.planet, name);
         Planet parent = locate(ContentType.planet, value.getString("parent", ""));
-        Planet planet_ = make(resolve(ContentType.planet, value.getString("type", "planet"), Planet.class),
-            new Class[] { String.class, Planet.class, float.class, int.class }, mod + "-" + name,
-            parent, value.getFloat("radius", 1f), value.getInt("sectorSize", 0));
+        Planet planet_ =
+            make(resolve(ContentType.planet, value.getString("type", "planet"), Planet.class),
+                new Class[] {String.class, Planet.class, float.class, int.class}, mod + "-" + name,
+                parent, value.getFloat("radius", 1f), value.getInt("sectorSize", 0));
         if (value.has("type"))
           value.remove("type");
         if (value.has("name"))
@@ -582,7 +584,8 @@ public class POContentParser implements ContentParserI {
             child.remove("add");
           }
 
-          Object readField = parser.readValue(field.getType(), metadata.elementType, child, metadata.keyType);
+          Object readField =
+              parser.readValue(field.getType(), metadata.elementType, child, metadata.keyType);
           Object fieldObj = field.get(object);
 
           // if a map has add: true, add its contents to the map instead
@@ -834,7 +837,8 @@ public class POContentParser implements ContentParserI {
   }
 
   private void readBundle(ContentType type, String name, JsonValue value) {
-    UnlockableContent cont = locate(type, name) instanceof UnlockableContent ? locate(type, name) : null;
+    UnlockableContent cont =
+        locate(type, name) instanceof UnlockableContent ? locate(type, name) : null;
 
     String entryName = cont == null ? type + "." + currentMod.name + "-" + name + "."
         : type + "." + cont.name + ".";
@@ -862,7 +866,8 @@ public class POContentParser implements ContentParserI {
   }
 
   private void readDisplayBundle(ContentType type, String name, JsonValue value) {
-    UnlockableContent cont = locate(type, name) instanceof UnlockableContent ? locate(type, name) : null;
+    UnlockableContent cont =
+        locate(type, name) instanceof UnlockableContent ? locate(type, name) : null;
 
     String entryName = cont == null ? type + "." + currentMod.name + "-" + name + "."
         : type + "." + cont.name + ".";

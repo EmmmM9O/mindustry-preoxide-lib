@@ -33,8 +33,7 @@ public class POGUtil {
 
   public static HDRFrameBuffer getFrameBuffer() {
     if (frameBuffer == null)
-      frameBuffer = new HDRFrameBuffer(Core.graphics.getWidth(),
-          Core.graphics.getHeight(), true);
+      frameBuffer = new HDRFrameBuffer(Core.graphics.getWidth(), Core.graphics.getHeight(), true);
     return frameBuffer;
   }
 

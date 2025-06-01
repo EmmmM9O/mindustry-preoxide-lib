@@ -28,12 +28,13 @@ public class POPlanetRenderer implements Disposable {
   public final PlaneBatch3D projector = new PlaneBatch3D();
   public final Mat3D mat = new Mat3D();
 
-  public final Bloom bloom = new Bloom(Core.graphics.getWidth() / 4, Core.graphics.getHeight() / 4, true, false) {
-    {
-      setThreshold(0.8f);
-      blurPasses = 6;
-    }
-  };
+  public final Bloom bloom =
+      new Bloom(Core.graphics.getWidth() / 4, Core.graphics.getHeight() / 4, true, false) {
+        {
+          setThreshold(0.8f);
+          blurPasses = 6;
+        }
+      };
   public final Mesh atmosphere = MeshBuilder.buildHex(Color.white, 2, false, 1.5f);
 
   // seed: 8kmfuix03fw

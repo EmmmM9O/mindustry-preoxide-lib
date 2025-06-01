@@ -14,8 +14,8 @@ A library for mindustry json/js/java mod development, providing graphics and oth
 
 ## Content
 
-| Module   | Dependent Modules | Dependent by Modules |
-| -------- | ----------------- | -------------------- |
+|  Module  | Dependent Modules | Dependent by Modules |
+|----------|-------------------|----------------------|
 | parser   | -                 | universe             |
 | graphics | -                 | universe             |
 | universe | parser, graphics  | -                    |

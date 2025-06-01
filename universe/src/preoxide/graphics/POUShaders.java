@@ -71,7 +71,8 @@ public class POUShaders {
         this.ray = new BlackholeRayData();
       }
       if (data.has("adisk")) {
-        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        this.adisk =
+            POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
         data.remove("adisk");
       } else {
         this.adisk = new BlackholeAdiskData();
@@ -311,7 +312,8 @@ public class POUShaders {
     public void parse(String name, String mod, JsonValue data, FastBlackhole p) throws Exception {
       radius = p.radius;
       if (data.has("rayData")) {
-        this.rayData = POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
+        this.rayData =
+            POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
         data.remove("rayData");
       } else {
         this.rayData = new BlackholeRayData();
@@ -398,7 +400,8 @@ public class POUShaders {
         throw new IllegalArgumentException("Blackhole need a ray map use rayMaps:[\"xxx\"] ");
       }
       if (data.has("adisk")) {
-        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        this.adisk =
+            POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
         data.remove("adisk");
       } else {
         this.adisk = new BlackholeAdiskData();
@@ -424,7 +427,8 @@ public class POUShaders {
     }
 
     @Override
-    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p) throws Exception {
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p)
+        throws Exception {
       super.parse(name, mod, data, p);
       if (rayMaps.size != 1)
         Log.warn("level @ only need 1 rayMap get @", p.level, rayMaps.size);
@@ -461,7 +465,8 @@ public class POUShaders {
       Gl.activeTexture(Gl.texture0);
     }
 
-    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p) throws Exception {
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p)
+        throws Exception {
       super.parse(name, mod, data, p);
       if (rayMaps.size != 1)
         Log.warn("level @ only need 1 rayMap get @", p.level, rayMaps.size);
@@ -508,7 +513,8 @@ public class POUShaders {
       Gl.activeTexture(Gl.texture0);
     }
 
-    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p) throws Exception {
+    public void parse(String name, String mod, JsonValue data, FastAdiskBlackhole p)
+        throws Exception {
       super.parse(name, mod, data, p);
       if (rayMaps.size != 1)
         Log.warn("level @ only need 1 rayMap get @", p.level, rayMaps.size);

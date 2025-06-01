@@ -10,11 +10,11 @@
 
 ## 内容
 
-| 模块     | 依赖模块        | 被哪些模块依赖 |
-| -------- | --------------- | -------------- |
-| parser   | -               | universe       |
-| graphics | -               | universe       |
-| universe | parser,graphics | -              |
+|    模块    |      依赖模块       | 被哪些模块依赖  |
+|----------|-----------------|----------|
+| parser   | -               | universe |
+| graphics | -               | universe |
+| universe | parser,graphics | -        |
 
 ### TOOD
 
