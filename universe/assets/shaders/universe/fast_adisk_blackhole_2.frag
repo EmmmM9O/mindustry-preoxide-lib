@@ -87,6 +87,7 @@ vec4 get_ray(vec2 uv, vec3 pos, vec3 dir, vec3 h) {
     float dd = t / PI * psize;
     int p1 = int(floor(dd)) + 4;
     float res = getLen(p1, tile);
+    if (res <= inner) res = inner + 0.1;
     if (res <= outer && res >= inner) {
         vec3 pos = cos(t) * res * dir + sin(t) * res * e_y;
         float p = atan2(pos.x, pos.z);

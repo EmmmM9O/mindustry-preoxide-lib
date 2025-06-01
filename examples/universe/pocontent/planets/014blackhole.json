@@ -11,9 +11,7 @@
   "level": 2,
   "maxZoom": 80,
   "camLength": 10,
-  "rayMaps": [
-    "textures/fb_ray_map_4.png"
-  ],
+  "rayMaps": ["textures/fb_ray_map_4.png"],
   "colorMap": "textures/fb_color_map.png",
   "colorScl": 4.0,
   "adisk": {

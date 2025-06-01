@@ -625,11 +625,8 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     if (mode == Mode.planetLaunch)
       return launchSector != null && (launchCandidates.contains(planet)
           || (planet == launchSector.planet && planet.allowSelfSectorLaunch));
-    return planet.visible();
-    /*
-     * return (planet.alwaysUnlocked && planet.isLandable()) ||
-     * planet.sectors.contains(Sector::hasBase) || debugSelect;
-     */
+      return (planet.alwaysUnlocked && planet.isLandable()) ||
+     planet.sectors.contains(Sector::hasBase) || debugSelect||!planet.accessible;
   }
 
   void setup() {
@@ -1337,7 +1334,7 @@ public class POPlanetDialog extends BaseDialog implements PlanetInterfaceRendere
     }
 
     if ((sector.hasBase() && mode == Mode.look) || canSelect(sector)
-        || (sector.preset != null && sector.preset.alwaysUnlocked) || debugSelect) {
+        || (sector.preset != null && sector.preset.alwaysUnlocked)) {
       stable
           .button(
               mode == Mode.select ? "@sectors.select"

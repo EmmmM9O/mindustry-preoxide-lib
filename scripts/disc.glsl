@@ -1,5 +1,16 @@
 #version 300 es
 precision highp float;
+#define OCTAVES 5
+#define OUTER 8.6
+#define INNER 2.6
+#define AMPLITUDE 0.5
+#define H 1.0
+#define POS vec3(0.0)
+#define PSCALE 4.0
+#define LOD1 4
+#define OFFSET vec3(pnoise2,0.0,0.0)
+#define PNOISE max(createNoise(puv,10.0,0.2),createNoise(puv*1.5,10.0,0.4)*0.7)
+#define GEN
 out vec4 fragColor;
 uniform vec2 resolution;
 uniform float time;
@@ -204,33 +215,38 @@ float periodicPerlinNoise(vec2 p, vec2 repeat) {
 }
 float discFbm(vec2 p, int octaves) {
     float value = 0.0;
-    float amplitude = 0.5;
+    float amplitude = AMPLITUDE;
+    float to = exp2(-H);
     for (int i = 0; i < octaves; i++) {
-        value += amplitude * (periodicPerlinNoise(p, vec2(10000.0, 4.0)) + 1.0) / 2.0;
+        value += amplitude * (periodicPerlinNoise(p, vec2(10000.0, PSCALE)) + 1.0) / 2.0;
         p *= 2.0;
-        amplitude *= 0.5;
+        amplitude *= to;
     }
     return value;
 }
+float createNoise(in vec2 uv, in float ringScale, in float warpFactor) {
+    return smoothstep(0.3, 0.7, discFbm(vec2(log(uv.x) * ringScale,
+                mod(uv.y + warpFactor * uv.x + pi, 2.0 * pi) / pi / 2.0 * PSCALE), OCTAVES));
+}
 void main(void) {
     vec2 uv = gl_FragCoord.xy / resolution.xy;
-    float outer = 12.6;
-    float inner = 2.6;
+    float outer = OUTER;
+    float inner = INNER;
     float ut = uv.x * (outer - inner) + inner;
     float ph = uv.y * 2.0 * pi - pi;
     float phi = (uv.y * 2.0 * pi - pi);
     ph = 0.0;
-    vec3 pos = vec3(cos(ph), 0.0, sin(ph)) * ut + vec3(0.0, 0.0, 5.0);
+    vec2 puv = vec2(uv.x, phi);
+    float pnoise = PNOISE;
+    float pnoise2 = pow(pnoise, 0.5);
+    vec3 pos = vec3(cos(ph), 0.0, sin(ph)) * ut + POS;
     vec3 dir = -vec3(sin(ph), 0.0, cos(ph));
     dir *= 0.2;
     vec3 h = cross(pos, dir);
     float h2 = dot(h, h);
     float alpha = 1.0;
     vec3 color = vec3(0.0);
-    float ringScale = 10.0;
-    float warpFactor = 0.2;
-    float pnoise = discFbm(vec2(log(uv.x) * ringScale,
-                mod(phi + warpFactor * uv.x + pi, 2.0 * pi) / pi / 2.0 * 4.0), 5);
+
     for (int i = 0; i < 200; i++) {
         if (alpha <= 0.0001)
             break;
@@ -271,12 +287,12 @@ void main(void) {
                 radialCoords.z = distFromDisc * 0.1;
                 radialCoords *= 3.5;
                 vec3 offset = vec3(1.0, 0.07, 0.0) * 10.0
-                        + vec3(0.0, 0.0, 0.0);
+                        + OFFSET;
                 float accum = 0.0;
                 float alpha_ = 0.5;
                 float octAlpha = 0.87;
                 float octScale = 0.6;
-                const int u_adisk_noise_LOD_1 = 4;
+                const int u_adisk_noise_LOD_1 = LOD1;
                 float octShift = (octAlpha / octScale) / float(u_adisk_noise_LOD_1);
                 for (int i = 0; i < u_adisk_noise_LOD_1; i++) {
                     accum += alpha_ * snoise(radialCoords);
@@ -286,11 +302,11 @@ void main(void) {
                 float fbm = accum + octShift;
                 fbm = fbm * fbm;
                 fbm = fbm * fbm;
-                density *= fbm * dr ;
+                density *= fbm * dr;
 
                 float gr = 1.0 - radialGradient;
                 gr = gr * gr;
-                float glowStrength = 1.0  / (gr * gr * 400.0 + 0.002);
+                float glowStrength = 1.0 / (gr * gr * 400.0 + 0.002);
                 vec3 glow = Blackbody(2700.0 + glowStrength * 50.0) * glowStrength;
                 glow *= sin(p - 1.07) * 0.75 + 1.0;
                 float stepTransmittance = exp2(-density * 4.0);
@@ -310,10 +326,12 @@ void main(void) {
         dir += -1.5 * h2 * pos / r5;
         pos += dir;
     }
-    color*=pnoise;
-    //color/=3.0;
+    color *= pnoise;
+    #ifdef GEN
+    color /= 3.0;
+    #else
     color = aces(color);
     color = pow(color, vec3(1.0 / 2.8));
-
+    #endif
     fragColor = vec4(color, 1.0 - alpha);
 }
