@@ -1,4 +1,5 @@
 
+        /*
 mindustry preoxide lib
             Copyright (C) 2025 EmmmM9O
 
@@ -14,6 +15,7 @@ mindustry preoxide lib
 
             You should have received a copy of the GNU General Public License
             along with this program.  If not, see <https://www.gnu.org/licenses/>.
+        */
 package preoxide.math;
 
 import arc.math.geom.*;

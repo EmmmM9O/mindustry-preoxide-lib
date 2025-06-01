@@ -1,4 +1,5 @@
 
+        /*
 mindustry preoxide lib
             Copyright (C) 2025 EmmmM9O
 
@@ -14,6 +15,7 @@ mindustry preoxide lib
 
             You should have received a copy of the GNU General Public License
             along with this program.  If not, see <https://www.gnu.org/licenses/>.
+        */
 package preoxide.mod;
 
 import java.lang.reflect.*;
@@ -64,13 +66,51 @@ public class POContentParser implements ContentParserI {
           new POChildParser<GenericMesh, Planet>() {
             public GenericMesh parse(Planet planet, JsonValue data) throws Exception {
               if (data.isArray()) {
-                var res = new GenericMesh[data.size];for(int i=0;i<data.size;i++){res[i]=parse(planet,data.get(i));}return new MultiMesh(res);}String tname=Strings.capitalize(data.getString("type","NoiseMesh"));
+                var res = new GenericMesh[data.size];
+                for (int i = 0; i < data.size; i++) {
+                  res[i] = parse(planet, data.get(i));
+                }
+                return new MultiMesh(res);
+              }
+              String tname = Strings.capitalize(data.getString("type", "NoiseMesh"));
 
-  return switch(tname){
-  // TODO NoiseMesh is bad
-  case"NoiseMesh"->new NoiseMesh(planet,data.getInt("seed",0),data.getInt("divisions",1),data.getFloat("radius",1f),data.getInt("octaves",1),data.getFloat("persistence",0.5f),data.getFloat("scale",1f),data.getFloat("mag",0.5f),Color.valueOf(data.getString("color1",data.getString("color","ffffff"))),Color.valueOf(data.getString("color2",data.getString("color","ffffff"))),data.getInt("colorOct",1),data.getFloat("colorPersistence",0.5f),data.getFloat("colorScale",1f),data.getFloat("colorThreshold",0.5f));case"SunMesh"->{var cvals=data.get("colors").asStringArray();var colors=new Color[cvals.length];for(int i=0;i<cvals.length;i++){colors[i]=Color.valueOf(cvals[i]);}
+              return switch (tname) {
+                // TODO NoiseMesh is bad
+                case "NoiseMesh" -> new NoiseMesh(planet, data.getInt("seed", 0),
+                    data.getInt("divisions", 1), data.getFloat("radius", 1f),
+                    data.getInt("octaves", 1), data.getFloat("persistence", 0.5f),
+                    data.getFloat("scale", 1f), data.getFloat("mag", 0.5f),
+                    Color.valueOf(data.getString("color1", data.getString("color", "ffffff"))),
+                    Color.valueOf(data.getString("color2", data.getString("color", "ffffff"))),
+                    data.getInt("colorOct", 1), data.getFloat("colorPersistence", 0.5f),
+                    data.getFloat("colorScale", 1f), data.getFloat("colorThreshold", 0.5f));
+                case "SunMesh" -> {
+                  var cvals = data.get("colors").asStringArray();
+                  var colors = new Color[cvals.length];
+                  for (int i = 0; i < cvals.length; i++) {
+                    colors[i] = Color.valueOf(cvals[i]);
+                  }
 
-  yield new SunMesh(planet,data.getInt("divisions",1),data.getInt("octaves",1),data.getFloat("persistence",0.5f),data.getFloat("scl",1f),data.getFloat("pow",1f),data.getFloat("mag",0.5f),data.getFloat("colorScale",1f),colors);}case"HexSkyMesh"->new HexSkyMesh(planet,data.getInt("seed",0),data.getFloat("speed",0),data.getFloat("radius",1f),data.getInt("divisions",3),Color.valueOf(data.getString("color","ffffff")),data.getInt("octaves",1),data.getFloat("persistence",0.5f),data.getFloat("scale",1f),data.getFloat("thresh",0.5f));case"MultiMesh"->new MultiMesh(parse(planet,data.get("meshes")));case"MatMesh"->new MatMesh(parse(planet,data.get("mesh")),parser.readValue(Mat3D.class,data.get("mat")));case"HexMesh"->new HexMesh(planet,data.getInt("divisions",6));default->throw new RuntimeException("Unknown mesh type: "+tname);};};}));}};
+                  yield new SunMesh(planet, data.getInt("divisions", 1), data.getInt("octaves", 1),
+                      data.getFloat("persistence", 0.5f), data.getFloat("scl", 1f),
+                      data.getFloat("pow", 1f), data.getFloat("mag", 0.5f),
+                      data.getFloat("colorScale", 1f), colors);
+                }
+                case "HexSkyMesh" -> new HexSkyMesh(planet, data.getInt("seed", 0),
+                    data.getFloat("speed", 0), data.getFloat("radius", 1f),
+                    data.getInt("divisions", 3), Color.valueOf(data.getString("color", "ffffff")),
+                    data.getInt("octaves", 1), data.getFloat("persistence", 0.5f),
+                    data.getFloat("scale", 1f), data.getFloat("thresh", 0.5f));
+                case "MultiMesh" -> new MultiMesh(parse(planet, data.get("meshes")));
+                case "MatMesh" -> new MatMesh(parse(planet, data.get("mesh")),
+                    parser.readValue(Mat3D.class, data.get("mat")));
+                case "HexMesh" -> new HexMesh(planet, data.getInt("divisions", 6));
+                default -> throw new RuntimeException("Unknown mesh type: " + tname);
+              };
+            };
+          }));
+    }
+  };
 
   public <R, T> void addChildParser(Class<? extends R> clazz, POChildParser<R, T> cParser) {
     childParsers.get(clazz, Seq::new).add(cParser);
@@ -230,53 +270,76 @@ public class POContentParser implements ContentParserI {
     return current;
   }
 
-  ObjectMap<ContentType, POTypeParser<?>> parsers=ObjectMap.of(ContentType.sector,(POTypeParser<SectorPreset>)(mod,name,value)->{if(value.isString()){return locate(ContentType.sector,name);}
+  ObjectMap<ContentType, POTypeParser<?>> parsers =
+      ObjectMap.of(ContentType.sector, (POTypeParser<SectorPreset>) (mod, name, value) -> {
+        if (value.isString()) {
+          return locate(ContentType.sector, name);
+        }
 
-  if(!value.has("sector")||!value.get("sector").isNumber())throw new RuntimeException("SectorPresets must have a sector number.");
+        if (!value.has("sector") || !value.get("sector").isNumber())
+          throw new RuntimeException("SectorPresets must have a sector number.");
 
-  SectorPreset out=new SectorPreset(mod+"-"+name,currentMod);
+        SectorPreset out = new SectorPreset(mod + "-" + name, currentMod);
 
-  currentContent=out;read(()->{Planet planet=locate(ContentType.planet,value.getString("planet","serpulo"));
+        currentContent = out;
+        read(() -> {
+          Planet planet = locate(ContentType.planet, value.getString("planet", "serpulo"));
 
-  if(planet==null)throw new RuntimeException("Planet '"+value.getString("planet")+"' not found.");var current=out;try{current=toggleTypeListeners(ContentType.sector,current,mod,name,value);}catch(
-  Throwable e)
-  {
-    Log.err(e);
-  }current.initialize(planet,value.getInt("sector",0));
+          if (planet == null)
+            throw new RuntimeException("Planet '" + value.getString("planet") + "' not found.");
+          var current = out;
+          try {
+            current = toggleTypeListeners(ContentType.sector, current, mod, name, value);
+          } catch (Throwable e) {
+            Log.err(e);
+          }
+          current.initialize(planet, value.getInt("sector", 0));
 
-  value.remove("sector");value.remove("planet");
+          value.remove("sector");
+          value.remove("planet");
 
-  if(value.has("rules"))
-  {
-    JsonValue r = value.remove("rules");
-    if (!r.isObject())
-      throw new RuntimeException("Rules must be an object!");
-    current.rules = rules -> {
-      try {
-        // Use standard JSON, this is not content-parser relevant
-        JsonIO.json.readFields(rules, r);
-      } catch (Throwable e) { // Try not to crash here, as that would be catastrophic and
-                              // confusing
-        Log.err(e);
-      }
-    };
-  }
+          if (value.has("rules")) {
+            JsonValue r = value.remove("rules");
+            if (!r.isObject())
+              throw new RuntimeException("Rules must be an object!");
+            current.rules = rules -> {
+              try {
+                // Use standard JSON, this is not content-parser relevant
+                JsonIO.json.readFields(rules, r);
+              } catch (Throwable e) { // Try not to crash here, as that would be catastrophic and
+                                      // confusing
+                Log.err(e);
+              }
+            };
+          }
 
-  readFields(current, value);
-        });return out;},ContentType.planet,(POTypeParser<Planet>)(mod,name,value)->{name=value.getString("name",name);readDisplayBundle(ContentType.planet,name,value);if(value.isString())return locate(ContentType.planet,name);
+          readFields(current, value);
+        });
+        return out;
+      }, ContentType.planet, (POTypeParser<Planet>) (mod, name, value) -> {
+        name = value.getString("name", name);
+        readDisplayBundle(ContentType.planet, name, value);
+        if (value.isString())
+          return locate(ContentType.planet, name);
 
-  Planet parent = locate(ContentType.planet, value.getString("parent", ""));
-  Planet planet_ = make(
-      resolve(ContentType.planet, value.getString("type", "planet"), Planet.class),
-      new Class[] {String.class, Planet.class, float.class, int.class}, mod + "-" + name, parent,
-      value.getFloat("radius", 1f), value.getInt("sectorSize",
-          0));if(value.has("type"))value.remove("type");if(value.has("name"))value.remove("name");if(value.has("parent"))value.remove("parent");
+        Planet parent = locate(ContentType.planet, value.getString("parent", ""));
+        Planet planet_ =
+            make(resolve(ContentType.planet, value.getString("type", "planet"), Planet.class),
+                new Class[] {String.class, Planet.class, float.class, int.class}, mod + "-" + name,
+                parent, value.getFloat("radius", 1f), value.getInt("sectorSize", 0));
+        if (value.has("type"))
+          value.remove("type");
+        if (value.has("name"))
+          value.remove("name");
+        if (value.has("parent"))
+          value.remove("parent");
 
-  if(value.has("radius"))value.remove("radius");
+        if (value.has("radius"))
+          value.remove("radius");
 
-  planet_=
+        planet_ =
 
-  toggleTypeListeners(ContentType.planet, planet_, mod, name, value);
+            toggleTypeListeners(ContentType.planet, planet_, mod, name, value);
 
         Planet planet = planet_;
         if (planet instanceof CustomizeParser cParser) {
