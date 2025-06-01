@@ -1,7 +1,7 @@
 # Mindustry Preoxide
 
-![badge](https://img.shields.io/github/commit-activity/m/EmmmM9O/mindustry-preoxide)
-[![license](https://img.shields.io/github/license/EmmmM9O/mindustry-preoxide.svg)](LICENSE)
+![badge](https://img.shields.io/github/commit-activity/m/EmmmM9O/mindustry-preoxide-lib)
+[![license](https://img.shields.io/github/license/EmmmM9O/mindustry-preoxide-lib.svg)](LICENSE)
 
 面向mindustry json/js/java modder的前置库,提供图形学等帮助
 

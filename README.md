@@ -1,7 +1,7 @@
 # Mindustry Preoxide
 
-![badge](https://img.shields.io/github/commit-activity/m/EmmmM9O/mindustry-preoxide)
-[![license](https://img.shields.io/github/license/EmmmM9O/mindustry-preoxide.svg)](LICENSE)
+![badge](https://img.shields.io/github/commit-activity/m/EmmmM9O/mindustry-preoxide-lib)
+[![license](https://img.shields.io/github/license/EmmmM9O/mindustry-preoxide-lib.svg)](LICENSE)
 
 A library for mindustry json/js/java mod development, providing graphics and other tools.
 
