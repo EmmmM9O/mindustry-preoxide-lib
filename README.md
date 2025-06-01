@@ -14,8 +14,8 @@ A library for mindustry json/js/java mod development, providing graphics and oth
 
 ## Content
 
-|  Module  | Dependent Modules | Dependent by Modules |
-|----------|-------------------|----------------------|
+| Module   | Dependent Modules | Dependent by Modules |
+| -------- | ----------------- | -------------------- |
 | parser   | -                 | universe             |
 | graphics | -                 | universe             |
 | universe | parser, graphics  | -                    |
@@ -47,4 +47,4 @@ For fast black hole colorMap generation, please use glslSandbox under scripts/ i
 
 ## License
 
-[MIT](LICENSE) © EmmmM9O
+[GPL3.0](LICENSE) © EmmmM9O

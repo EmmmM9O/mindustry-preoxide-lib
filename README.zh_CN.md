@@ -10,11 +10,11 @@
 
 ## 内容
 
-|    模块    |      依赖模块       | 被哪些模块依赖  |
-|----------|-----------------|----------|
-| parser   | -               | universe |
-| graphics | -               | universe |
-| universe | parser,graphics | -        |
+| 模块     | 依赖模块        | 被哪些模块依赖 |
+| -------- | --------------- | -------------- |
+| parser   | -               | universe       |
+| graphics | -               | universe       |
+| universe | parser,graphics | -              |
 
 ### TOOD
 
@@ -43,4 +43,4 @@ Fast黑洞的colorMap生成请使用scripts/下的glslSandbox配合disc.glsl使�
 
 ## 使用许可
 
-[MIT](LICENSE) EmmmM9O
+[GPL3.0](LICENSE) EmmmM9O
