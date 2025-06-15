@@ -1,21 +1,21 @@
 
-        /*
+/*
 mindustry preoxide lib
-            Copyright (C) 2025 EmmmM9O
+    Copyright (C) 2025 EmmmM9O
 
-            This program is free software: you can redistribute it and/or modify
-            it under the terms of the GNU General Public License as published by
-            the Free Software Foundation, either version 3 of the License, or
-            (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-            This program is distributed in the hope that it will be useful,
-            but WITHOUT ANY WARRANTY; without even the implied warranty of
-            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-            GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-            You should have received a copy of the GNU General Public License
-            along with this program.  If not, see <https://www.gnu.org/licenses/>.
-        */
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package preoxide.graphics;
 
 import arc.graphics.*;
@@ -88,8 +88,7 @@ public class POUShaders {
         this.ray = new BlackholeRayData();
       }
       if (data.has("adisk")) {
-        this.adisk =
-            POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
         data.remove("adisk");
       } else {
         this.adisk = new BlackholeAdiskData();
@@ -140,8 +139,8 @@ public class POUShaders {
   }
 
   public static class Gas2NoiseBlackhole extends NoiseBlackholeBase {
-    public int adiskNoiseLOD1 = 4, adiskNoiseLOD2 = 6;
-    public Texture noise, colorMap;
+    public int adiskNoiseLOD1 = 4, adiskNoiseLOD2 = 4;
+    public Texture noise;
 
     @Override
     public void apply() {
@@ -150,8 +149,7 @@ public class POUShaders {
       setUniformi("u_adisk_noise_LOD_2", adiskNoiseLOD2);
       noise.bind(3);
       setUniformi("u_noise_tex", 3);
-      colorMap.bind(4);
-      setUniformi("u_color_map", 4);
+
       Gl.activeTexture(Gl.texture0);
     }
 
@@ -176,17 +174,12 @@ public class POUShaders {
         throw new IllegalArgumentException("must have noise");
       noise = new Texture(Vars.tree.get(data.getString("noise")), true);
       data.remove("noise");
-      if (!data.has("colorMap"))
-        throw new IllegalArgumentException("must have colorMap");
-      colorMap = new Texture(Vars.tree.get(data.getString("colorMap")), true);
-      data.remove("colorMap");
     }
 
     @Override
     public void dispose() {
       super.dispose();
       noise.dispose();
-      colorMap.dispose();
     }
   }
 
@@ -329,8 +322,7 @@ public class POUShaders {
     public void parse(String name, String mod, JsonValue data, FastBlackhole p) throws Exception {
       radius = p.radius;
       if (data.has("rayData")) {
-        this.rayData =
-            POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
+        this.rayData = POPVars.mod.parser.parser.readValue(BlackholeRayData.class, data.get("rayData"));
         data.remove("rayData");
       } else {
         this.rayData = new BlackholeRayData();
@@ -417,8 +409,7 @@ public class POUShaders {
         throw new IllegalArgumentException("Blackhole need a ray map use rayMaps:[\"xxx\"] ");
       }
       if (data.has("adisk")) {
-        this.adisk =
-            POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
+        this.adisk = POPVars.mod.parser.parser.readValue(BlackholeAdiskData.class, data.get("adisk"));
         data.remove("adisk");
       } else {
         this.adisk = new BlackholeAdiskData();

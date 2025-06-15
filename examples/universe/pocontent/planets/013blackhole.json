@@ -12,5 +12,7 @@
   "camLength": 2,
   "noiseType": "gas2",
   "noise": "textures/iqnoise.png",
-  "colorMap": "textures/bh_color_map.png"
+  "adisk": {
+    "noiseScale": 1.0
+  }
 }

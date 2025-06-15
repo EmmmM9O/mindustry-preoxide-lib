@@ -1,5 +1,4 @@
 uniform sampler2D u_noise_tex;
-uniform sampler2D u_color_map;
 uniform float u_adisk_inner_radius;
 uniform float u_adisk_outer_radius;
 uniform float u_adisk_speed;
@@ -21,6 +20,34 @@ float iqnoise(in vec3 x)
     vec2 uv = (p.xy + vec2(37.0, 17.0) * p.z) + f.xy;
     vec2 rg = textureLod(u_noise_tex, (uv + 0.5) / 256.0, 0.0).yx;
     return -1.0 + 2.0 * mix(rg.x, rg.y, f.z);
+}
+vec3 Blackbody(float temperature) {
+    // https://en.wikipedia.org/wiki/Planckian_locus
+    const mat2x4 splineX = mat2x4(-0.2661293e9, -0.2343589e6, 0.8776956e3, 0.179910,
+            -3.0258469e9, 2.1070479e6, 0.2226347e3, 0.240390);
+
+    const mat3x4 splineY = mat3x4(-1.1063814, -1.34811020, 2.18555832, -0.20219683,
+            -0.9549476, -1.37418593, 2.09137015, -0.16748867,
+            3.0817580, -5.87338670, 3.75112997, -0.37001483);
+
+    float rt = 1.0 / temperature;
+    float rt2 = rt * rt;
+    vec4 coeffX = vec4(rt2 * rt, rt2, rt, 1.0);
+
+    float x = dot(coeffX, temperature < 4000.0 ? splineX[0] : splineX[1]);
+    float x2 = x * x;
+    vec4 coeffY = vec4(x2 * x, x2, x, 1.0);
+
+    float z = 1.0 / dot(coeffY, temperature < 2222.0 ? splineY[0] : temperature < 4000.0 ? splineY[1] : splineY[2]);
+
+    vec3 xyz = vec3(x * z, 1.0, z);
+    xyz.z -= xyz.x + 1.0;
+
+    const mat3 xyzToSrgb = mat3(3.24097, -0.96924, 0.05563,
+            -1.53738, 1.87597, -0.20398,
+            -0.49861, 0.04156, 1.05697);
+
+    return max(xyzToSrgb * xyz, vec3(0.0));
 }
 ///from https://www.shadertoy.com/view/lstSRS
 ///----
@@ -121,42 +148,78 @@ void adisk_color(vec3 pos, inout vec3 color, inout float alpha, float scl) {
         return;
     }
     vec3 radialCoords;
-    radialCoords.x = distFromCenter * 1.5 + 0.55;
-    radialCoords.y = atan2(-pos.x, -pos.z) * 1.5;
-    radialCoords.z = distFromDisc * 1.5;
+    float p = atan2(-pos.x, -pos.z);
+    radialCoords.x = distFromCenter * 1.2 + 0.55;
+    radialCoords.y = p * (1.0 - radialGradient * 0.5);
+    radialCoords.z = distFromDisc * 1.0;
 
     radialCoords *= 0.95;
     vec3 rc = radialCoords + 0.0;
-    float noise1 = 1.0;
-    float start = u_adisk_noise_scale;
+    vec3 offset = vec3(1.0, 0.02, 0.0) * u_time * u_adisk_speed * 7.0;
+    float accum = 0.0;
+    float alpha_ = 0.5;
+    float octAlpha = 0.87;
+    float octScale = u_adisk_noise_scale;
+    float octShift = (octAlpha / octScale) / float(u_adisk_noise_LOD_1);
     for (int i = 0; i < u_adisk_noise_LOD_1; i++) {
-        rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
-        noise1 *= 0.5 * iqnoise(rc * start) + 0.5;
-        start *= 2.0;
+        accum += alpha_ * iqnoise(rc);
+        rc = (rc + offset) * octScale;
+        alpha_ *= octAlpha;
     }
-    float noise2 = 2.0;
-    start = u_adisk_noise_scale;
+    float fbm = accum + octShift;
+    fbm = fbm * fbm;
+    fbm = fbm * fbm;
     rc = radialCoords + 30.0;
+    accum = 0.0;
+    alpha_ = 0.5;
+    octAlpha = 0.87;
+    octScale = u_adisk_noise_scale;
+    octShift = (octAlpha / octScale) / float(u_adisk_noise_LOD_2);
     for (int i = 0; i < u_adisk_noise_LOD_2; i++) {
-        noise2 *= 0.5 * iqnoise(rc * start) + 0.5;
-        start *= 2.0;
-        rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
+        accum += alpha_ * iqnoise(rc);
+        rc = (rc + offset) * octScale;
+        alpha_ *= octAlpha;
     }
-    dustColor *= noise1 * 0.998 + 0.002;
-    coverage *= noise2;
+    float fbm2 = accum + octShift;
+    fbm2 = fbm2 * fbm2;
+    fbm2 = fbm2 * fbm2;
+    /*
+                                                                                                                                float noise1 = 1.0;
+                                                                                                                                float start = u_adisk_noise_scale;
+                                                                                                                                for (int i = 0; i < u_adisk_noise_LOD_1; i++) {
+                                                                                                                                    rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
+                                                                                                                                    noise1 *= 0.5 * iqnoise(rc * start) + 0.5;
+                                                                                                                                    start *= 2.0;
+                                                                                                                                }
+                                                                                                                                float noise2 = 2.0;
+                                                                                                                                start = u_adisk_noise_scale;
+                                                                                                                                rc = radialCoords + 30.0;
+                                                                                                                                for (int i = 0; i < u_adisk_noise_LOD_2; i++) {
+                                                                                                                                    noise2 *= 0.5 * iqnoise(rc * start) + 0.5;
+                                                                                                                                    start *= 2.0;
+                                                                                                                                    rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
+                                                                                                                                }*/
+    coverage *= fbm2;
+    dustColor *= fbm * 0.998 + 0.002;
 
-    radialCoords.y += u_time * u_adisk_speed * 0.5;
+    float gr = 1.0 - radialGradient;
+    gr = gr * gr;
+    float glowStrength = 1.0 / (gr * gr * 400.0 + 0.002);
+    vec3 glow = Blackbody(2700.0 + glowStrength * 50.0) * glowStrength;
+    glow *= sin(p - 1.07) * 0.75 + 1.0;
 
-    dustColor *= pow(texture(u_color_map, radialCoords.yx * vec2(0.15, 0.27)).rgb, vec3(2.0)) * 4.0;
+    dustColor *= glow;
 
     coverage = saturate(coverage * 1200.0 / float(u_max_steps));
-    dustColor = max(vec3(0.0), dustColor);
+    dustColor = min(vec3(20.0), max(vec3(0.0), dustColor));
 
     coverage *= pcurve(radialGradient, 4.0, 0.9) * u_coverage_lit;
+    float stepTransmittance = exp2(-coverage * 7.0);
+    float integral = 1.0 - stepTransmittance;
 
-    color += (1.0 - alpha) * u_adisk_lit * dustColor * coverage;
+    color += (1.0 - alpha) * u_adisk_lit * dustColor * integral * 1.4;
 
-    alpha = (1.0 - alpha) * coverage + alpha;
+    alpha = (1.0 - alpha) * integral + alpha;
     alpha = min(alpha, 1.0);
     //Haze
     vec2 t = vec2(1.0, 0.01);

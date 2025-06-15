@@ -2,7 +2,7 @@
   "name": "test",
   "displayName": "测试",
   "generator": "SerpuloPlanetGenerator",
-  "parent": "poeu-blackhole3",
+  "parent": "poeu-blackhole5",
   "iconColor": "7d4dffff",
   "orbitRadius": 40,
   "hasAtmosphere": true,

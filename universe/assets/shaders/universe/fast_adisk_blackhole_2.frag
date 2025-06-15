@@ -82,6 +82,7 @@ vec4 get_ray(vec2 uv, vec3 pos, vec3 dir, vec3 h) {
     float t = atan(dy / dx);
     float resx = cos(t);
     float resy = sin(t);
+    float dis = uv.x * u_start_distance;
     const float psize = (size * size - 1.0) * 4.0;
     if (t <= 0.0) t = PI + t;
     float dd = t / PI * psize;
@@ -100,7 +101,10 @@ vec4 get_ray(vec2 uv, vec3 pos, vec3 dir, vec3 h) {
     }
     color = clamp(color, vec3(0.0), vec3(u_max_light));
     if (coord.x <= 0.0001 && coord.y <= 0.0001 && coord.z <= 0.0001 && coord.w <= 0.0001) {
-        color += vec3(0.0) * alpha;
+        if (dis <= 0.6)
+            color += vec3(0.0) * alpha;
+        else
+            color += vec3((dis - 0.6) / 2.0) * alpha;
     } else {
         vec3 u = -normalize(h);
 
