@@ -9,7 +9,6 @@ uniform vec2 u_resolution;
 uniform vec3 u_camera_pos;
 uniform mat3 u_camera_mat;
 uniform samplerCube u_cubemap;
-uniform samplerCube u_cubemap_ori;
 
 uniform float u_len_scl;
 uniform float u_max_distance_2;
@@ -31,14 +30,14 @@ vec4 get_color(vec3 pos, vec3 dir) {
     float h2 = dot(h, h);
     float sp2 = u_step_size * u_step_size;
     if (h2 >= u_start_distance_2 * sp2) {
-	return vec4(0.0);
+        return vec4(0.0);
         //return texture(u_cubemap_ori, dir / u_step_size);
     }
     float t = dot(-pos, dir / u_step_size);
     float dt = sqrt(u_start_distance_2 - h2 / sp2);
     float t2 = t + dt;
     if (t2 < 0.0) {
-	return vec4(0.0);
+        return vec4(0.0);
         //return texture(u_cubemap_ori, dir / u_step_size);
     }
     float to = (length(pos) - u_start_distance);

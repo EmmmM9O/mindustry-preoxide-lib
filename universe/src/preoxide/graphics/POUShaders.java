@@ -18,6 +18,7 @@ mindustry preoxide lib
 */
 package preoxide.graphics;
 
+import arc.*;
 import arc.graphics.*;
 import arc.graphics.Texture.*;
 import arc.graphics.g3d.*;
@@ -546,4 +547,85 @@ public class POUShaders {
     }
   }
 
+  public static class TAABlackholeShader extends POLoadShader implements CustomizeChildParser<TAABlackhole> {
+    public Camera3D camera;
+    public Vec3 target;
+    public Vec2 resolution;
+    public Cubemap cubemap;
+    public float startDistance;
+    public TAABlackholeData data;
+    public Texture backbuffer, noise;
+
+    public TAABlackholeShader() {
+      super("universe/taablackhole", "screen");
+    }
+
+    @Override
+    protected String preprocess(String source, boolean fragment) {
+      return super.preprocess(source, fragment).replace(
+          "out" + (Core.app.isMobile() ? " lowp" : "") + " vec4 fragColor;\n", "");
+    }
+
+    @Override
+    public void apply() {
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180) / 2.0)) * 2f);
+      setUniformf("u_start_distance", startDistance);
+      setUniformf("u_resolution", resolution);
+      setUniformf("u_camera_pos", POGUtil.t34.set(camera.position).sub(target));
+      setUniformMatrix("u_camera_mat", POGUtil.getCamMat(camera));
+      if (backbuffer != null)
+        backbuffer.bind(0);
+      setUniformi("u_backbuffer", 0);
+      noise.bind(1);
+      setUniformi("u_noise", 1);
+      cubemap.bind(2);
+      setUniformi("u_cubemap", 2);
+      setUniformf("u_time", Time.globalTime / 10f);
+      data.apply(this);
+      Gl.activeTexture(Gl.texture0);
+    }
+
+    @Override
+    public void parse(String name, String mod, JsonValue data, TAABlackhole father)
+        throws Exception {
+      if (!data.has("noise"))
+        throw new IllegalArgumentException("must have noise");
+      noise = new Texture(Vars.tree.get(data.getString("noise")), true);
+      data.remove("noise");
+
+    }
+
+    @Override
+    public void dispose() {
+      super.dispose();
+      noise.dispose();
+    }
+
+  }
+
+  public static class TAABlackholeComposite extends POLoadShader {
+    public TAABlackholeData data;
+    public Texture input, background;
+    public Camera3D camera;
+    public Vec3 target;
+    public Vec2 resolution;
+
+    public TAABlackholeComposite() {
+      super("universe/taablackhole_composite", "screen");
+    }
+
+    @Override
+    public void apply() {
+      setUniformf("u_fov_scale", (float) Math.tan((camera.fov * (Math.PI / 180) / 2.0)) * 2.0f);
+      setUniformf("u_resolution", resolution);
+      setUniformf("u_camera_pos", POGUtil.t34.set(camera.position).sub(target));
+      setUniformMatrix("u_camera_mat_inv", POGUtil.getCamMat(camera).inv());
+      input.bind(0);
+      setUniformi("u_input", 0);
+      background.bind(1);
+      setUniformi("u_background", 1);
+      data.applyComp(this);
+      Gl.activeTexture(Gl.texture0);
+    }
+  }
 }

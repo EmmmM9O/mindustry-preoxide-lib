@@ -1,0 +1,15 @@
+{
+  "name": "blackhole6",
+  "type": "TAABlackhole",
+  "displayName": "黑洞6",
+  "iconColor": "483D8BFF",
+  "radius": 1,
+  "orbitSpacing": 25,
+  "cubemap": "test/",
+  "startDistance": 20,
+  "accessible": false,
+  "maxZoom": 60,
+  "camLength": 1,
+  "noiseType": "gas1",
+  "noise": "textures/iqnoise.png"
+}

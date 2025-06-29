@@ -19,7 +19,7 @@ float iqnoise(in vec3 x)
     f = f * f * (3.0 - 2.0 * f);
     vec2 uv = (p.xy + vec2(37.0, 17.0) * p.z) + f.xy;
     vec2 rg = textureLod(u_noise_tex, (uv + 0.5) / 256.0, 0.0).yx;
-    return -1.0 + 2.0 * mix(rg.x, rg.y, f.z);
+    return -0.75 + 2.0 * mix(rg.x, rg.y, f.z);
 }
 vec3 Blackbody(float temperature) {
     // https://en.wikipedia.org/wiki/Planckian_locus
@@ -149,58 +149,29 @@ void adisk_color(vec3 pos, inout vec3 color, inout float alpha, float scl) {
     }
     vec3 radialCoords;
     float p = atan2(-pos.x, -pos.z);
-    radialCoords.x = distFromCenter * 1.2 + 0.55;
-    radialCoords.y = p * (1.0 - radialGradient * 0.5);
-    radialCoords.z = distFromDisc * 1.0;
+    radialCoords.x = distFromCenter * 2.2 + 0.55;
+    radialCoords.y = p * 1.2;
+    radialCoords.z = distFromDisc * 4.0;
 
     radialCoords *= 0.95;
     vec3 rc = radialCoords + 0.0;
-    vec3 offset = vec3(1.0, 0.02, 0.0) * u_time * u_adisk_speed * 7.0;
-    float accum = 0.0;
-    float alpha_ = 0.5;
-    float octAlpha = 0.87;
-    float octScale = u_adisk_noise_scale;
-    float octShift = (octAlpha / octScale) / float(u_adisk_noise_LOD_1);
+    float noise1 = 1.0;
+    float start = u_adisk_noise_scale;
     for (int i = 0; i < u_adisk_noise_LOD_1; i++) {
-        accum += alpha_ * iqnoise(rc);
-        rc = (rc + offset) * octScale;
-        alpha_ *= octAlpha;
+        rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
+        noise1 *= 0.5 * iqnoise(rc * start) + 0.5;
+        start *= 2.0;
     }
-    float fbm = accum + octShift;
-    fbm = fbm * fbm;
-    fbm = fbm * fbm;
+    float noise2 = 2.0;
+    start = u_adisk_noise_scale;
     rc = radialCoords + 30.0;
-    accum = 0.0;
-    alpha_ = 0.5;
-    octAlpha = 0.87;
-    octScale = u_adisk_noise_scale;
-    octShift = (octAlpha / octScale) / float(u_adisk_noise_LOD_2);
     for (int i = 0; i < u_adisk_noise_LOD_2; i++) {
-        accum += alpha_ * iqnoise(rc);
-        rc = (rc + offset) * octScale;
-        alpha_ *= octAlpha;
+        noise2 *= 0.5 * iqnoise(rc * start) + 0.5;
+        start *= 2.0;
+        rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
     }
-    float fbm2 = accum + octShift;
-    fbm2 = fbm2 * fbm2;
-    fbm2 = fbm2 * fbm2;
-    /*
-                                                                                                                                float noise1 = 1.0;
-                                                                                                                                float start = u_adisk_noise_scale;
-                                                                                                                                for (int i = 0; i < u_adisk_noise_LOD_1; i++) {
-                                                                                                                                    rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
-                                                                                                                                    noise1 *= 0.5 * iqnoise(rc * start) + 0.5;
-                                                                                                                                    start *= 2.0;
-                                                                                                                                }
-                                                                                                                                float noise2 = 2.0;
-                                                                                                                                start = u_adisk_noise_scale;
-                                                                                                                                rc = radialCoords + 30.0;
-                                                                                                                                for (int i = 0; i < u_adisk_noise_LOD_2; i++) {
-                                                                                                                                    noise2 *= 0.5 * iqnoise(rc * start) + 0.5;
-                                                                                                                                    start *= 2.0;
-                                                                                                                                    rc.y -= float((i % 2) * 2 - 1) * u_time * u_adisk_speed;
-                                                                                                                                }*/
-    coverage *= fbm2;
-    dustColor *= fbm * 0.998 + 0.002;
+    coverage *= noise2;
+    dustColor *= noise1 * 0.998 + 0.002;
 
     float gr = 1.0 - radialGradient;
     gr = gr * gr;

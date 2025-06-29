@@ -13,6 +13,6 @@
   "noiseType": "gas2",
   "noise": "textures/iqnoise.png",
   "adisk": {
-    "noiseScale": 1.0
+    "noiseScale": 3.0
   }
 }

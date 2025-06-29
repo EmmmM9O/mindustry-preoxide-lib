@@ -1,21 +1,21 @@
 
-        /*
+/*
 mindustry preoxide lib
-            Copyright (C) 2025 EmmmM9O
+    Copyright (C) 2025 EmmmM9O
 
-            This program is free software: you can redistribute it and/or modify
-            it under the terms of the GNU General Public License as published by
-            the Free Software Foundation, either version 3 of the License, or
-            (at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-            This program is distributed in the hope that it will be useful,
-            but WITHOUT ANY WARRANTY; without even the implied warranty of
-            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-            GNU General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-            You should have received a copy of the GNU General Public License
-            along with this program.  If not, see <https://www.gnu.org/licenses/>.
-        */
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package preoxide.graphics;
 
 import arc.*;
@@ -45,13 +45,12 @@ public class POPlanetRenderer implements Disposable {
   public final PlaneBatch3D projector = new PlaneBatch3D();
   public final Mat3D mat = new Mat3D();
 
-  public final Bloom bloom =
-      new Bloom(Core.graphics.getWidth() / 4, Core.graphics.getHeight() / 4, true, false) {
-        {
-          setThreshold(0.8f);
-          blurPasses = 6;
-        }
-      };
+  public final Bloom bloom = new Bloom(Core.graphics.getWidth() / 4, Core.graphics.getHeight() / 4, true, false) {
+    {
+      setThreshold(0.8f);
+      blurPasses = 6;
+    }
+  };
   public final Mesh atmosphere = MeshBuilder.buildHex(Color.white, 2, false, 1.5f);
 
   // seed: 8kmfuix03fw
@@ -61,7 +60,7 @@ public class POPlanetRenderer implements Disposable {
 
   public POPlanetRenderer() {
     projector.setScaling(1f / 150f);
-    cam.fov = 100f;
+    cam.fov = 57f;
     cam.far = 400f;
   }
 
